@@ -101,6 +101,9 @@ class DecisionTree:
 
         node_dict = {}
         node_dict = get_best_split(df_pca, features_subset, node_neighbors, loadings)
+        loadings_all = list()
+        loadings_all.append(loadings)
+        print(loadings_all)
         return node_dict
 
 
@@ -187,7 +190,7 @@ class DecisionTree:
 
         if tree.value != None:
             return tree.value
-        feature_value = x[tree.feature]
+        feature_value = x[tree.feature] # this needs to be multiplied with hte loading of feature 
         
         # Go to the left
         if feature_value <= tree.threshold:
@@ -230,7 +233,7 @@ class RandomForest:
     '''
     A class that implements Random Forest algorithm from scratch.
     '''
-    def __init__(self, num_trees=10, min_samples_split=2, max_depth=1000, max_samples=100):
+    def __init__(self, num_trees=10, min_samples_split=2, max_depth=1000, max_samples=10):
         self.num_trees = num_trees
         self.min_samples_split = min_samples_split
         self.max_depth = max_depth
