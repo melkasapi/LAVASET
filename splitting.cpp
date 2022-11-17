@@ -1902,7 +1902,7 @@ static PyTypeObject *__pyx_ptype_5numpy_ufunc = 0;
 static bool __pyx_f_9splitting_is_pure(PyObject *, int __pyx_skip_dispatch); /*proto*/
 static PyObject *__pyx_f_9splitting_add_endnode(PyObject *, bool, bool, int __pyx_skip_dispatch); /*proto*/
 static double __pyx_f_9splitting_gini_index(PyObject *, PyObject *, int __pyx_skip_dispatch); /*proto*/
-static PyObject *__pyx_f_9splitting_get_best_split(PyArrayObject *, PyArrayObject *, PyObject *, PyObject *, int __pyx_skip_dispatch); /*proto*/
+static PyObject *__pyx_f_9splitting_get_best_split(PyArrayObject *, PyArrayObject *, PyObject *, PyObject *, PyObject *, PyObject *, int __pyx_skip_dispatch); /*proto*/
 static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_float64_t = { "float64_t", NULL, sizeof(__pyx_t_5numpy_float64_t), { 0 }, 0, 'R', 0, 0 };
 static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_int_t = { "int_t", NULL, sizeof(__pyx_t_5numpy_int_t), { 0 }, 0, IS_UNSIGNED(__pyx_t_5numpy_int_t) ? 'U' : 'I', IS_UNSIGNED(__pyx_t_5numpy_int_t), 0 };
 #define __Pyx_MODULE_NAME "splitting"
@@ -1922,6 +1922,7 @@ static const char __pyx_k_data[] = "data";
 static const char __pyx_k_gini[] = "gini";
 static const char __pyx_k_left[] = "left";
 static const char __pyx_k_main[] = "__main__";
+static const char __pyx_k_mean[] = "mean";
 static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_node[] = "node";
 static const char __pyx_k_size[] = "size";
@@ -1945,6 +1946,7 @@ static const char __pyx_k_bincount[] = "bincount";
 static const char __pyx_k_end_node[] = "end_node";
 static const char __pyx_k_features[] = "features";
 static const char __pyx_k_loadings[] = "loadings";
+static const char __pyx_k_variance[] = "variance";
 static const char __pyx_k_enumerate[] = "enumerate";
 static const char __pyx_k_left_node[] = "left_node";
 static const char __pyx_k_predictor[] = "predictor";
@@ -1981,6 +1983,7 @@ static PyObject *__pyx_n_s_left;
 static PyObject *__pyx_n_s_left_node;
 static PyObject *__pyx_n_s_loadings;
 static PyObject *__pyx_n_s_main;
+static PyObject *__pyx_n_s_mean;
 static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_n_s_node;
 static PyObject *__pyx_n_s_node_neighbors;
@@ -2000,6 +2003,7 @@ static PyObject *__pyx_n_s_split_point;
 static PyObject *__pyx_n_s_sum;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_unique;
+static PyObject *__pyx_n_s_variance;
 static PyObject *__pyx_n_s_y_hat;
 static PyObject *__pyx_n_s_y_left;
 static PyObject *__pyx_n_s_y_right;
@@ -2007,7 +2011,7 @@ static PyObject *__pyx_n_s_zip;
 static PyObject *__pyx_pf_9splitting_is_pure(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_Y); /* proto */
 static PyObject *__pyx_pf_9splitting_2add_endnode(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_node, bool __pyx_v_left, bool __pyx_v_right); /* proto */
 static PyObject *__pyx_pf_9splitting_4gini_index(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_y_left, PyObject *__pyx_v_y_right); /* proto */
-static PyObject *__pyx_pf_9splitting_6get_best_split(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_data, PyArrayObject *__pyx_v_features, PyObject *__pyx_v_node_neighbors, PyObject *__pyx_v_loadings); /* proto */
+static PyObject *__pyx_pf_9splitting_6get_best_split(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_data, PyArrayObject *__pyx_v_features, PyObject *__pyx_v_node_neighbors, PyObject *__pyx_v_loadings, PyObject *__pyx_v_mean, PyObject *__pyx_v_variance); /* proto */
 static PyObject *__pyx_int_0;
 static PyObject *__pyx_int_1;
 static PyObject *__pyx_int_2;
@@ -3276,12 +3280,12 @@ static PyObject *__pyx_pf_9splitting_4gini_index(CYTHON_UNUSED PyObject *__pyx_s
  * @cython.wraparound(False)
  * @cython.cdivision(True)
  * cpdef dict get_best_split(ndarray[float64_t, ndim=2] data, ndarray[int_t, ndim=1] features, dict node_neighbors,             # <<<<<<<<<<<<<<
- *                          dict loadings):
+ *                          dict loadings, dict mean, dict variance):
  *     cdef:
  */
 
 static PyObject *__pyx_pw_9splitting_7get_best_split(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_f_9splitting_get_best_split(PyArrayObject *__pyx_v_data, PyArrayObject *__pyx_v_features, PyObject *__pyx_v_node_neighbors, PyObject *__pyx_v_loadings, CYTHON_UNUSED int __pyx_skip_dispatch) {
+static PyObject *__pyx_f_9splitting_get_best_split(PyArrayObject *__pyx_v_data, PyArrayObject *__pyx_v_features, PyObject *__pyx_v_node_neighbors, PyObject *__pyx_v_loadings, PyObject *__pyx_v_mean, PyObject *__pyx_v_variance, CYTHON_UNUSED int __pyx_skip_dispatch) {
   PyObject *__pyx_v_df_left = 0;
   PyObject *__pyx_v_df_right = 0;
   double __pyx_v_split_point;
@@ -4004,9 +4008,9 @@ static PyObject *__pyx_f_9splitting_get_best_split(PyArrayObject *__pyx_v_data, 
  *                 best_split_dict = {
  *                                 'feature_index': i_idx,             # <<<<<<<<<<<<<<
  *                                 'split_point': b_split_point,
- *                                 # 'left': b_left,
+ *                                 'loadings': loadings[f_idx][0],
  */
-        __pyx_t_7 = __Pyx_PyDict_NewPresized(9); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 132, __pyx_L1_error)
+        __pyx_t_7 = __Pyx_PyDict_NewPresized(12); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 132, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
         if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_feature_index, __pyx_v_i_idx) < 0) __PYX_ERR(0, 132, __pyx_L1_error)
 
@@ -4014,15 +4018,81 @@ static PyObject *__pyx_f_9splitting_get_best_split(PyArrayObject *__pyx_v_data, 
  *                 best_split_dict = {
  *                                 'feature_index': i_idx,
  *                                 'split_point': b_split_point,             # <<<<<<<<<<<<<<
- *                                 # 'left': b_left,
- *                                 # 'right': b_right,
+ *                                 'loadings': loadings[f_idx][0],
+ *                                 'mean': mean[f_idx][0],
  */
         __pyx_t_9 = PyFloat_FromDouble(__pyx_v_b_split_point); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 133, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_split_point, __pyx_t_9) < 0) __PYX_ERR(0, 132, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
+        /* "splitting.pyx":134
+ *                                 'feature_index': i_idx,
+ *                                 'split_point': b_split_point,
+ *                                 'loadings': loadings[f_idx][0],             # <<<<<<<<<<<<<<
+ *                                 'mean': mean[f_idx][0],
+ *                                 'variance': variance[f_idx][0],
+ */
+        if (unlikely(__pyx_v_loadings == Py_None)) {
+          PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+          __PYX_ERR(0, 134, __pyx_L1_error)
+        }
+        __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_f_idx); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 134, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_9);
+        __pyx_t_8 = __Pyx_PyDict_GetItem(__pyx_v_loadings, __pyx_t_9); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 134, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_8);
+        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+        __pyx_t_9 = __Pyx_GetItemInt(__pyx_t_8, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 134, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_9);
+        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+        if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_loadings, __pyx_t_9) < 0) __PYX_ERR(0, 132, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+
+        /* "splitting.pyx":135
+ *                                 'split_point': b_split_point,
+ *                                 'loadings': loadings[f_idx][0],
+ *                                 'mean': mean[f_idx][0],             # <<<<<<<<<<<<<<
+ *                                 'variance': variance[f_idx][0],
+ *                                 # 'left': b_left,
+ */
+        if (unlikely(__pyx_v_mean == Py_None)) {
+          PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+          __PYX_ERR(0, 135, __pyx_L1_error)
+        }
+        __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_f_idx); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 135, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_9);
+        __pyx_t_8 = __Pyx_PyDict_GetItem(__pyx_v_mean, __pyx_t_9); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 135, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_8);
+        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+        __pyx_t_9 = __Pyx_GetItemInt(__pyx_t_8, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 135, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_9);
+        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+        if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_mean, __pyx_t_9) < 0) __PYX_ERR(0, 132, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+
         /* "splitting.pyx":136
+ *                                 'loadings': loadings[f_idx][0],
+ *                                 'mean': mean[f_idx][0],
+ *                                 'variance': variance[f_idx][0],             # <<<<<<<<<<<<<<
+ *                                 # 'left': b_left,
+ *                                 # 'right': b_right,
+ */
+        if (unlikely(__pyx_v_variance == Py_None)) {
+          PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
+          __PYX_ERR(0, 136, __pyx_L1_error)
+        }
+        __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_f_idx); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 136, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_9);
+        __pyx_t_8 = __Pyx_PyDict_GetItem(__pyx_v_variance, __pyx_t_9); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 136, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_8);
+        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+        __pyx_t_9 = __Pyx_GetItemInt(__pyx_t_8, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 136, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_9);
+        __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+        if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_variance, __pyx_t_9) < 0) __PYX_ERR(0, 132, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+
+        /* "splitting.pyx":139
  *                                 # 'left': b_left,
  *                                 # 'right': b_right,
  *                                 'y_left': y_left,             # <<<<<<<<<<<<<<
@@ -4031,7 +4101,7 @@ static PyObject *__pyx_f_9splitting_get_best_split(PyArrayObject *__pyx_v_data, 
  */
         if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_y_left, __pyx_v_y_left) < 0) __PYX_ERR(0, 132, __pyx_L1_error)
 
-        /* "splitting.pyx":137
+        /* "splitting.pyx":140
  *                                 # 'right': b_right,
  *                                 'y_left': y_left,
  *                                 'y_right': y_right,             # <<<<<<<<<<<<<<
@@ -4040,7 +4110,7 @@ static PyObject *__pyx_f_9splitting_get_best_split(PyArrayObject *__pyx_v_data, 
  */
         if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_y_right, __pyx_v_y_right) < 0) __PYX_ERR(0, 132, __pyx_L1_error)
 
-        /* "splitting.pyx":138
+        /* "splitting.pyx":141
  *                                 'y_left': y_left,
  *                                 'y_right': y_right,
  *                                 'samples_left': samples_left,             # <<<<<<<<<<<<<<
@@ -4049,7 +4119,7 @@ static PyObject *__pyx_f_9splitting_get_best_split(PyArrayObject *__pyx_v_data, 
  */
         if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_samples_left, __pyx_v_samples_left) < 0) __PYX_ERR(0, 132, __pyx_L1_error)
 
-        /* "splitting.pyx":139
+        /* "splitting.pyx":142
  *                                 'y_right': y_right,
  *                                 'samples_left': samples_left,
  *                                 'samples_right':samples_right,             # <<<<<<<<<<<<<<
@@ -4058,31 +4128,31 @@ static PyObject *__pyx_f_9splitting_get_best_split(PyArrayObject *__pyx_v_data, 
  */
         if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_samples_right, __pyx_v_samples_right) < 0) __PYX_ERR(0, 132, __pyx_L1_error)
 
-        /* "splitting.pyx":140
+        /* "splitting.pyx":143
  *                                 'samples_left': samples_left,
  *                                 'samples_right':samples_right,
  *                                 'predictor': b_predictor,             # <<<<<<<<<<<<<<
  *                                 'gini': b_gini,#gain
  *                                 'gini_latent': gini_dict
  */
-        __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_b_predictor); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 140, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_b_predictor); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 143, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_predictor, __pyx_t_9) < 0) __PYX_ERR(0, 132, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-        /* "splitting.pyx":141
+        /* "splitting.pyx":144
  *                                 'samples_right':samples_right,
  *                                 'predictor': b_predictor,
  *                                 'gini': b_gini,#gain             # <<<<<<<<<<<<<<
  *                                 'gini_latent': gini_dict
  *                             }
  */
-        __pyx_t_9 = PyFloat_FromDouble(__pyx_v_b_gini); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 141, __pyx_L1_error)
+        __pyx_t_9 = PyFloat_FromDouble(__pyx_v_b_gini); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 144, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_gini, __pyx_t_9) < 0) __PYX_ERR(0, 132, __pyx_L1_error)
         __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-        /* "splitting.pyx":142
+        /* "splitting.pyx":145
  *                                 'predictor': b_predictor,
  *                                 'gini': b_gini,#gain
  *                                 'gini_latent': gini_dict             # <<<<<<<<<<<<<<
@@ -4123,14 +4193,14 @@ static PyObject *__pyx_f_9splitting_get_best_split(PyArrayObject *__pyx_v_data, 
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "splitting.pyx":146
+  /* "splitting.pyx":149
  *         # best_split_dict = {}
  * 
  *     return best_split_dict             # <<<<<<<<<<<<<<
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_best_split_dict)) { __Pyx_RaiseUnboundLocalError("best_split_dict"); __PYX_ERR(0, 146, __pyx_L1_error) }
+  if (unlikely(!__pyx_v_best_split_dict)) { __Pyx_RaiseUnboundLocalError("best_split_dict"); __PYX_ERR(0, 149, __pyx_L1_error) }
   __Pyx_INCREF(__pyx_v_best_split_dict);
   __pyx_r = __pyx_v_best_split_dict;
   goto __pyx_L0;
@@ -4139,7 +4209,7 @@ static PyObject *__pyx_f_9splitting_get_best_split(PyArrayObject *__pyx_v_data, 
  * @cython.wraparound(False)
  * @cython.cdivision(True)
  * cpdef dict get_best_split(ndarray[float64_t, ndim=2] data, ndarray[int_t, ndim=1] features, dict node_neighbors,             # <<<<<<<<<<<<<<
- *                          dict loadings):
+ *                          dict loadings, dict mean, dict variance):
  *     cdef:
  */
 
@@ -4198,6 +4268,8 @@ static PyObject *__pyx_pw_9splitting_7get_best_split(PyObject *__pyx_self, PyObj
   PyArrayObject *__pyx_v_features = 0;
   PyObject *__pyx_v_node_neighbors = 0;
   PyObject *__pyx_v_loadings = 0;
+  PyObject *__pyx_v_mean = 0;
+  PyObject *__pyx_v_variance = 0;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -4205,12 +4277,16 @@ static PyObject *__pyx_pw_9splitting_7get_best_split(PyObject *__pyx_self, PyObj
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("get_best_split (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_data,&__pyx_n_s_features,&__pyx_n_s_node_neighbors,&__pyx_n_s_loadings,0};
-    PyObject* values[4] = {0,0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_data,&__pyx_n_s_features,&__pyx_n_s_node_neighbors,&__pyx_n_s_loadings,&__pyx_n_s_mean,&__pyx_n_s_variance,0};
+    PyObject* values[6] = {0,0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case  6: values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
+        CYTHON_FALLTHROUGH;
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
         case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
         CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
@@ -4231,40 +4307,56 @@ static PyObject *__pyx_pw_9splitting_7get_best_split(PyObject *__pyx_self, PyObj
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_features)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("get_best_split", 1, 4, 4, 1); __PYX_ERR(0, 65, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("get_best_split", 1, 6, 6, 1); __PYX_ERR(0, 65, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_node_neighbors)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("get_best_split", 1, 4, 4, 2); __PYX_ERR(0, 65, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("get_best_split", 1, 6, 6, 2); __PYX_ERR(0, 65, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_loadings)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("get_best_split", 1, 4, 4, 3); __PYX_ERR(0, 65, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("get_best_split", 1, 6, 6, 3); __PYX_ERR(0, 65, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  4:
+        if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_mean)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("get_best_split", 1, 6, 6, 4); __PYX_ERR(0, 65, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  5:
+        if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_variance)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("get_best_split", 1, 6, 6, 5); __PYX_ERR(0, 65, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "get_best_split") < 0)) __PYX_ERR(0, 65, __pyx_L3_error)
       }
-    } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
       goto __pyx_L5_argtuple_error;
     } else {
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
       values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+      values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+      values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
     }
     __pyx_v_data = ((PyArrayObject *)values[0]);
     __pyx_v_features = ((PyArrayObject *)values[1]);
     __pyx_v_node_neighbors = ((PyObject*)values[2]);
     __pyx_v_loadings = ((PyObject*)values[3]);
+    __pyx_v_mean = ((PyObject*)values[4]);
+    __pyx_v_variance = ((PyObject*)values[5]);
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("get_best_split", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 65, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("get_best_split", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 65, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("splitting.get_best_split", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -4274,7 +4366,9 @@ static PyObject *__pyx_pw_9splitting_7get_best_split(PyObject *__pyx_self, PyObj
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_features), __pyx_ptype_5numpy_ndarray, 1, "features", 0))) __PYX_ERR(0, 65, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_node_neighbors), (&PyDict_Type), 1, "node_neighbors", 1))) __PYX_ERR(0, 65, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_loadings), (&PyDict_Type), 1, "loadings", 1))) __PYX_ERR(0, 66, __pyx_L1_error)
-  __pyx_r = __pyx_pf_9splitting_6get_best_split(__pyx_self, __pyx_v_data, __pyx_v_features, __pyx_v_node_neighbors, __pyx_v_loadings);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_mean), (&PyDict_Type), 1, "mean", 1))) __PYX_ERR(0, 66, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_variance), (&PyDict_Type), 1, "variance", 1))) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_r = __pyx_pf_9splitting_6get_best_split(__pyx_self, __pyx_v_data, __pyx_v_features, __pyx_v_node_neighbors, __pyx_v_loadings, __pyx_v_mean, __pyx_v_variance);
 
   /* function exit code */
   goto __pyx_L0;
@@ -4285,7 +4379,7 @@ static PyObject *__pyx_pw_9splitting_7get_best_split(PyObject *__pyx_self, PyObj
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_9splitting_6get_best_split(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_data, PyArrayObject *__pyx_v_features, PyObject *__pyx_v_node_neighbors, PyObject *__pyx_v_loadings) {
+static PyObject *__pyx_pf_9splitting_6get_best_split(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_data, PyArrayObject *__pyx_v_features, PyObject *__pyx_v_node_neighbors, PyObject *__pyx_v_loadings, PyObject *__pyx_v_mean, PyObject *__pyx_v_variance) {
   __Pyx_LocalBuf_ND __pyx_pybuffernd_data;
   __Pyx_Buffer __pyx_pybuffer_data;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_features;
@@ -4316,7 +4410,7 @@ static PyObject *__pyx_pf_9splitting_6get_best_split(CYTHON_UNUSED PyObject *__p
   }
   __pyx_pybuffernd_features.diminfo[0].strides = __pyx_pybuffernd_features.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_features.diminfo[0].shape = __pyx_pybuffernd_features.rcbuffer->pybuffer.shape[0];
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_9splitting_get_best_split(__pyx_v_data, __pyx_v_features, __pyx_v_node_neighbors, __pyx_v_loadings, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 65, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_9splitting_get_best_split(__pyx_v_data, __pyx_v_features, __pyx_v_node_neighbors, __pyx_v_loadings, __pyx_v_mean, __pyx_v_variance, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 65, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -5433,6 +5527,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_left_node, __pyx_k_left_node, sizeof(__pyx_k_left_node), 0, 0, 1, 1},
   {&__pyx_n_s_loadings, __pyx_k_loadings, sizeof(__pyx_k_loadings), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
+  {&__pyx_n_s_mean, __pyx_k_mean, sizeof(__pyx_k_mean), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
   {&__pyx_n_s_node, __pyx_k_node, sizeof(__pyx_k_node), 0, 0, 1, 1},
   {&__pyx_n_s_node_neighbors, __pyx_k_node_neighbors, sizeof(__pyx_k_node_neighbors), 0, 0, 1, 1},
@@ -5452,6 +5547,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_sum, __pyx_k_sum, sizeof(__pyx_k_sum), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
   {&__pyx_n_s_unique, __pyx_k_unique, sizeof(__pyx_k_unique), 0, 0, 1, 1},
+  {&__pyx_n_s_variance, __pyx_k_variance, sizeof(__pyx_k_variance), 0, 0, 1, 1},
   {&__pyx_n_s_y_hat, __pyx_k_y_hat, sizeof(__pyx_k_y_hat), 0, 0, 1, 1},
   {&__pyx_n_s_y_left, __pyx_k_y_left, sizeof(__pyx_k_y_left), 0, 0, 1, 1},
   {&__pyx_n_s_y_right, __pyx_k_y_right, sizeof(__pyx_k_y_right), 0, 0, 1, 1},

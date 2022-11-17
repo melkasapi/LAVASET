@@ -63,7 +63,7 @@ cpdef double gini_index(list y_left, list y_right):
 @cython.wraparound(False)
 @cython.cdivision(True)
 cpdef dict get_best_split(ndarray[float64_t, ndim=2] data, ndarray[int_t, ndim=1] features, dict node_neighbors, 
-                         dict loadings):
+                         dict loadings, dict mean, dict variance):
     cdef:
         # ndarray[double, ndim=1] y_left, y_right
         # ndarray[double, ndim=1] samples_left, samples_right
@@ -131,6 +131,9 @@ cpdef dict get_best_split(ndarray[float64_t, ndim=2] data, ndarray[int_t, ndim=1
                 best_split_dict = {
                                 'feature_index': i_idx,
                                 'split_point': b_split_point, 
+                                'loadings': loadings[f_idx][0],
+                                'mean': mean[f_idx][0], 
+                                'variance': variance[f_idx][0], # taking only first value (value of the selected feature / not neighbors)
                                 # 'left': b_left, 
                                 # 'right': b_right, 
                                 'y_left': y_left,
