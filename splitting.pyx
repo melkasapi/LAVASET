@@ -54,9 +54,10 @@ cpdef double gini_index(list y_left, list y_right):
     gini_p = 1-np.sum(p_parent**2)
     
     gini_gain = gini_p - (proportion_left*gini_l + proportion_right*gini_r)
+    gini = proportion_left*gini_l + proportion_right*gini_r
     
     
-    return gini_gain
+    return gini
 
 
 @cython.boundscheck(False)
@@ -69,7 +70,7 @@ cpdef dict get_best_split(ndarray[float64_t, ndim=2] data, ndarray[int_t, ndim=1
         # ndarray[double, ndim=1] samples_left, samples_right
         list  df_left, df_right, b_left, b_right
         double split_point, b_split_point, gini
-        double b_gini = -1
+        double b_gini = 999.0
         int b_predictor, f_idx, predictor, row_i
         # int num_random_predictors = <int>ceil(sqrt(data.shape[1]-1)) # size of random_predictors array
         # ndarray[int_t, ndim=1] random_predictors = np.random.choice(data.shape[1]-1, num_random_predictors, replace=False)
@@ -119,7 +120,7 @@ cpdef dict get_best_split(ndarray[float64_t, ndim=2] data, ndarray[int_t, ndim=1
             y_right = [i[1] for i in df_right]
             
             gini = gini_index(y_left, y_right)
-            if gini > b_gini:
+            if gini < b_gini:
                 best_neighbors = node_neighbors[f_idx]
                 loading_weight = abs(loadings[f_idx])/sum(abs(loadings[f_idx]))
                 gini_latent=gini*(loadings[f_idx])

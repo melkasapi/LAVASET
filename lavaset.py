@@ -5,7 +5,6 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from random import Random, random, randrange
 from joblib import Parallel, delayed
-import time
 from sklearn.metrics import accuracy_score
 import pyximport
 pyximport.install()
@@ -104,8 +103,8 @@ class DecisionTree:
             mean[f_idx] = np.ravel(scaler.mean_)
             variance[f_idx] = np.ravel(scaler.var_)
             node_neighbors[f_idx] = indeces
+        
         X_pca = X_pca[:, 1:]  
-
         df_pca = np.concatenate((X_pca, np.array(y).reshape(1, -1).T), axis=1)
 
         node_dict = {}
@@ -246,7 +245,7 @@ class RandomForest:
     '''
     A class that implements Random Forest algorithm from scratch.
     '''
-    def __init__(self, num_trees=100, min_samples_split=2, max_depth=1000, max_samples=70):
+    def __init__(self, num_trees, min_samples_split=2, max_depth=1000, max_samples=70):
         self.num_trees = num_trees
         self.min_samples_split = min_samples_split
         self.max_depth = max_depth
@@ -269,16 +268,17 @@ class RandomForest:
         #     # Sample with replacement
         max_samples = self.max_samples
         indices = self._generate_sample_indices(idx, X.shape[0], max_samples)
+
         # # this shuffles features for max_features to be different in trees 
         # f_indices = self._generate_feature_indices(idx, X.shape[1])
         # print(f_indices)
         X_sub = X[indices, :]
         # X_sub = X_sub[:, f_indices]
-        _y_sub = y[indices]
+        y_sub = y[indices]
         df_train = pd.DataFrame(X_sub)
-        df_train[-1] = _y_sub
+        df_train[-1] = y_sub
         # Train
-        tree.fit(X_sub, _y_sub, random_state=idx)
+        tree.fit(X_sub, y_sub, random_state=idx)
         
         # Save the classifier
         self.decision_trees.append(tree)
@@ -345,69 +345,4 @@ class RandomForest:
         all_importances = np.mean(all_importances, axis=0, dtype=np.float64)
         return all_importances / np.sum(all_importances)
 
-
-nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
-
-X = np.array(nmr_peaks.iloc[:, 3:])
-y = np.array(nmr_peaks.iloc[:, 1])
-
-from sklearn.model_selection import train_test_split
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=80)
-# print(pd.DataFrame(X_train))
-
-# scaler = StandardScaler(with_mean=False)
-# scaler.fit(X_train)
-# X_test = scaler.transform(X_test)
-
-df_train = pd.DataFrame(X_train)
-df_train[-1] = y_train
-df_test = pd.DataFrame(X_test)
-df_test[-1] = y_test
-start = time.time()
-tree = RandomForest()
-tree.fit(X_train, y_train)
-preds = tree.predict(X_test)
-print(preds)
-print(accuracy_score(preds, y_test))
-
-#print(tree.nodes)
-feat = tree.get_importances(X_train)
-end = time.time()
-print(end-start)
-
-#pd.DataFrame(feat).to_csv('feature_impo_pca_100t10nn_changed_rs.csv')
-
-# simulated_groups = pd.read_excel('simulated_groups.xlsx', sheet_name=0)
-# simulated_impo = pd.read_excel('simulated_groups.xlsx', sheet_name=1)
-# nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
-# nmr_peaks.insert(2, 'sim_groups', value=simulated_groups.simulated_class)
-# nmr_peaks.sim_groups.replace({2:0}, inplace=True)
-# X = np.array(nmr_peaks.iloc[:, 4:])
-# y = np.array(nmr_peaks.iloc[:, 2])
-
-# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=45)
-# # print(pd.DataFrame(X_train))
-
-scaler = StandardScaler()
-scaler.fit(X_train)
-X_test = scaler.transform(X_test)
-
-# df_train = pd.DataFrame(X_train)
-# df_train[-1] = y_train
-# display(df_train.shape)
-# df_test = pd.DataFrame(X_test)
-# df_test[-1] = y_test
-# start = time.time()
-# tree = RandomForest()
-# tree.fit(X_train, y_train)
-# preds = tree.predict(X_test)
-# print(accuracy_score(preds, y_test))
-
-#print(tree.nodes)
-# feat = tree.get_importances(X_train)
-# end = time.time()
-# print(end-start)
-
-pd.DataFrame(feat).to_csv('feature_impo_pca_100t10nnNEWPREDICT2.csv')
 
