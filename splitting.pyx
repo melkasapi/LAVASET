@@ -59,6 +59,29 @@ cpdef double gini_index(list y_left, list y_right):
     
     return gini
 
+cpdef double gini_index(ndarray[float64_t, ndim=2] left, ndarray[float64_t, ndim=2] right):
+    cdef:
+        double purity = 0.0
+        double class_ratio
+        ndarray[float64_t, ndim=2] split
+        ndarray[int_t, ndim=1] class_counts, unique_classes
+        int total_classes, bi, i
+
+    for bi in range(2):
+        if bi == 0:
+            split = left
+        else:
+            split = right
+        
+        class_counts = np.bincount(split[:, -1].astype('int'))
+        unique_classes = np.array(np.nonzero(class_counts))[0]
+        
+        for i in range(unique_classes.shape[0]):
+            class_ratio = <double>class_counts[unique_classes[i]] / split.shape[0]
+            purity += class_ratio * (1 - class_ratio)
+    
+    return purity
+
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
