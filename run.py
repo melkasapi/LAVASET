@@ -14,7 +14,7 @@ nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
 X = np.array(nmr_peaks.iloc[:, 3:])
 #y = np.array(nmr_peaks.iloc[:, 1])
 y = pd.read_csv('testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=int)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=80)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=180)
 # print(pd.DataFrame(X_train))
 
 scaler = StandardScaler()

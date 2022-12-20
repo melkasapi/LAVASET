@@ -13,25 +13,25 @@ from splitting import get_best_split
 from cython.parallel import prange, parallel
 
 
-class Node:
-    '''
-    Helper class which implements a single tree node.
-    '''
-    def __init__(self, feature=None, threshold=None, 
-                        data_left=None, data_right=None, 
-                        gini=None, value=None, 
-                        gini_dict=None, loadings=None,
-                        mean=None, variance=None):
-        self.feature = feature
-        self.threshold = threshold
-        self.data_left = data_left
-        self.data_right = data_right
-        self.gini = gini
-        self.value = value
-        self.gini_dict = gini_dict
-        self.loadings = loadings
-        self.mean = mean
-        self.variance = variance
+# class Node:
+#     '''
+#     Helper class which implements a single tree node.
+#     '''
+#     def __init__(self, feature=None, threshold=None, 
+#                         data_left=None, data_right=None, 
+#                         gini=None, value=None, 
+#                         gini_dict=None, loadings=None,
+#                         mean=None, variance=None):
+#         self.feature = feature
+#         self.threshold = threshold
+#         self.data_left = data_left
+#         self.data_right = data_right
+#         self.gini = gini
+#         self.value = value
+#         self.gini_dict = gini_dict
+#         self.loadings = loadings
+#         self.mean = mean
+#         self.variance = variance
 
 def _make_estimator(base_estimator, append=True, random_state=None):
     """Make and configure a copy of the `base_estimator_` attribute.
@@ -61,6 +61,7 @@ class DecisionTree:
         self.nodes = []
         self.n_features_ = 0
         self.random_state = random_state
+        self.feature_count = None
         
 
     def _best_split(self, X, y):
@@ -74,15 +75,15 @@ class DecisionTree:
         n, m = X.shape
 
         max_features = max(1, int(np.sqrt(m)))
+        #max_features=10
         #max_features = int(m*0.05)
         X_pca = np.zeros((X.shape[0], 1))  # initiating nested array with array number = # of samples
         # loadings = np.zeros(((5*2+1), self.max_features))
         loadings = dict()
-    
         #features_subset = np.random.choice(X.shape[1], max_features, replace=False)
         random_instance = np.random.RandomState(self.random_state)
         features_subset = random_instance.randint(0, m, max_features)
-
+        self.feature_count[features_subset] += 1
         indexes_file = pd.read_csv('~/Documents/cmr_rf/nmr_10nn_index2.csv').to_numpy()
         #indexes_file = pd.read_csv('~/Documents/cmr_rf/nmr_knn_index_10k15k.csv').to_numpy()
         #indexes_file = pd.read_csv('~/Documents/cmr_rf/nmr_50nn_index.csv').to_numpy()
@@ -152,21 +153,21 @@ class DecisionTree:
                     depth=depth + 1,
                     # random_state = random_state + 1
                 )
-                return Node(
-                        feature=best['predictor'], 
-                        threshold=best['split_point'], 
-                        data_left=left, 
-                        data_right=right, 
-                        gini=best['gini'],
-                        gini_dict=best['gini_latent'], 
-                        loadings=best['loadings'], 
-                        mean=best['mean'],
-                        variance=best['variance']
-                )
-        return Node(
-            value=Counter(y).most_common(1)[0][0]
-        )
-        
+                node={
+                        'feature':best['predictor'], 
+                        'threshold':best['split_point'], 
+                        'data_left':left, 
+                        'data_right':right, 
+                        'gini':best['gini'],
+                        'gini_dict':best['gini_latent'], 
+                        'loadings':best['loadings'],
+                        'mean':best['mean'],
+                        'variance':best['variance']
+                }
+        node = {
+            'value':Counter(y).most_common(1)[0][0]
+        }
+        return node
     
     def fit(self, X, y, random_state):
         '''
@@ -180,11 +181,15 @@ class DecisionTree:
         n, m = X.shape
         self.n_features_ = m
         self.random_state = random_state
+        self.feature_count = np.zeros(m)
+
         self.root = self._build(X, y)
 
         #self.nodes.append(self.root)
 
         self.update_feature_importances()
+        #print(self.feature_count)
+        #pd.DataFrame(self.feature_count).to_csv('feature_count_test', mode='a')
         # f = open("nodes_100t10nn_changedrs.txt", "a")
         # f.write(repr(self.nodes))
         # f.close()
@@ -198,19 +203,21 @@ class DecisionTree:
         :return: float, predicted class
         '''
 #         # Leaf node
-
-        if tree.value != None:
-            return tree.value
+        if tree['value'] != None:
+            return tree['value']
         
-        #scaled_x = (x[tree.feature]-tree.mean)/tree.variance # scaling x based on node
-        feature_value = (x[tree.feature])*(tree.loadings) # this needs to be multiplied with the loading of feature 
+         #scaled_x = (x[tree.feature]-tree.mean)/tree.variance # scaling x based on node
+        
+        # this needs to be multiplied with the loading of feature 
+        feature_value = x[tree['feature']]*(tree['loadings'])
+        
         # Go to the left
-        if feature_value <= tree.threshold:
-            return self._predict(x=x, tree=tree.data_left)
+        if feature_value <= tree['threshold']:
+            return self._predict(x=x, tree=tree['data_left'])
         
         # Go to the right
-        if feature_value > tree.threshold:
-            return self._predict(x=x, tree=tree.data_right)
+        if feature_value > tree['threshold']:
+            return self._predict(x=x, tree=tree['data_right'])
         
     def predict(self, X):
         '''
@@ -245,13 +252,14 @@ class RandomForest:
     '''
     A class that implements Random Forest algorithm from scratch.
     '''
-    def __init__(self, num_trees, min_samples_split=2, max_depth=1000, max_samples=70):
+    def __init__(self, num_trees, min_samples_split=2, max_depth=1000, max_samples=100):
         self.num_trees = num_trees
         self.min_samples_split = min_samples_split
         self.max_depth = max_depth
         self.max_samples = max_samples
         # Will store individually trained decision trees
         self.decision_trees = []
+        self.feature_count_sum = np.array()
     
 
     @staticmethod
@@ -277,6 +285,7 @@ class RandomForest:
         y_sub = y[indices]
         df_train = pd.DataFrame(X_sub)
         df_train[-1] = y_sub
+        
         # Train
         tree.fit(X_sub, y_sub, random_state=idx)
         
