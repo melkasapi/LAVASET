@@ -22,7 +22,7 @@ scaler.fit(X_train)
 X_test = scaler.transform(X_test)
 
 start = time.time()
-model = RandomForest(num_trees=100)
+model = RandomForest(num_trees=10)
 model.fit(X_train, y_train)
 preds = model.predict(X_test)
 print(preds)
@@ -32,6 +32,7 @@ print(accuracy_score(preds, y_test))
 feat = model.get_importances(X_train)
 end = time.time()
 print(end-start)
+print(feat)
 
 #pd.DataFrame(feat).to_csv('feature_impo_pca_100t10nn_changed_rs.csv')
 
@@ -46,4 +47,4 @@ print(end-start)
 # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=45)
 # # print(pd.DataFrame(X_train))
 
-pd.DataFrame(feat).to_csv('testing/feature_impo_pca_100t10nnFORMATE2.csv')
+#pd.DataFrame(feat).to_csv('testing/feature_impo_pca_100t10nnFORMATE2.csv')

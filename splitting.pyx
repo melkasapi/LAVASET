@@ -31,7 +31,7 @@ cpdef add_endnode(dict node, bool left, bool right):
 @cython.wraparound(False)
 @cython.boundscheck(False)
 @cython.cdivision(True)
-#cpdef double gini_index(ndarray[float64_t, ndim=1] y_left, ndarray[float64_t, ndim=1] y_right):
+# cpdef double gini_index(ndarray[float64_t, ndim=1] y_left, ndarray[float64_t, ndim=1] y_right):
 cpdef double gini_index(list y_left, list y_right):
     cdef:
         double purity = 0.0
@@ -54,38 +54,37 @@ cpdef double gini_index(list y_left, list y_right):
     gini_p = 1-np.sum(p_parent**2)
     
     gini_gain = gini_p - (proportion_left*gini_l + proportion_right*gini_r)
-    gini = proportion_left*gini_l + proportion_right*gini_r
-    
-    
-    return gini
-
-cpdef double gini_index(ndarray[float64_t, ndim=2] left, ndarray[float64_t, ndim=2] right):
-    cdef:
-        double purity = 0.0
-        double class_ratio
-        ndarray[float64_t, ndim=2] split
-        ndarray[int_t, ndim=1] class_counts, unique_classes
-        int total_classes, bi, i
-
-    for bi in range(2):
-        if bi == 0:
-            split = left
-        else:
-            split = right
         
-        class_counts = np.bincount(split[:, -1].astype('int'))
-        unique_classes = np.array(np.nonzero(class_counts))[0]
+    return gini_gain
+
+# cpdef double gini_index(list left, list right):
+#     cdef:
+#         double purity = 0.0
+#         double class_ratio
+#         list split
+#         ndarray[int_t, ndim=1] class_counts, unique_classes
+#         int total_classes, bi, i
+
+#     for bi in range(2):
+#         if bi == 0:
+#             split = left
+#         else:
+#             split = right
         
-        for i in range(unique_classes.shape[0]):
-            class_ratio = <double>class_counts[unique_classes[i]] / split.shape[0]
-            purity += class_ratio * (1 - class_ratio)
+#         class_counts = np.bincount(split[:, -1].astype('int'))
+#         unique_classes = np.array(np.nonzero(class_counts))[0]
+        
+#         for i in range(unique_classes.shape[0]):
+#             class_ratio = <double>class_counts[unique_classes[i]] / split.shape[0]
+#             purity += class_ratio * (1 - class_ratio)
     
-    return purity
+#     return purity
 
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
+
 cpdef dict get_best_split(ndarray[float64_t, ndim=2] data, ndarray[int_t, ndim=1] features, dict node_neighbors, 
                          dict loadings, dict mean, dict variance):
     cdef:
@@ -93,7 +92,7 @@ cpdef dict get_best_split(ndarray[float64_t, ndim=2] data, ndarray[int_t, ndim=1
         # ndarray[double, ndim=1] samples_left, samples_right
         list  df_left, df_right, b_left, b_right
         double split_point, b_split_point, gini
-        double b_gini = 999.0
+        double b_gini = -1
         int b_predictor, f_idx, predictor, row_i
         # int num_random_predictors = <int>ceil(sqrt(data.shape[1]-1)) # size of random_predictors array
         # ndarray[int_t, ndim=1] random_predictors = np.random.choice(data.shape[1]-1, num_random_predictors, replace=False)
@@ -143,7 +142,7 @@ cpdef dict get_best_split(ndarray[float64_t, ndim=2] data, ndarray[int_t, ndim=1
             y_right = [i[1] for i in df_right]
             
             gini = gini_index(y_left, y_right)
-            if gini < b_gini:
+            if gini > b_gini:
                 best_neighbors = node_neighbors[f_idx]
                 loading_weight = abs(loadings[f_idx])/sum(abs(loadings[f_idx]))
                 gini_latent=gini*(loadings[f_idx])
