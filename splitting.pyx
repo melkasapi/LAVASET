@@ -31,7 +31,7 @@ cpdef add_endnode(dict node, bool left, bool right):
 @cython.wraparound(False)
 @cython.boundscheck(False)
 @cython.cdivision(True)
-#cpdef double gini_index(ndarray[float64_t, ndim=1] y_left, ndarray[float64_t, ndim=1] y_right):
+# cpdef double gini_index(ndarray[float64_t, ndim=1] y_left, ndarray[float64_t, ndim=1] y_right):
 cpdef double gini_index(list y_left, list y_right):
     cdef:
         double purity = 0.0
@@ -54,16 +54,39 @@ cpdef double gini_index(list y_left, list y_right):
     gini_p = 1-np.sum(p_parent**2)
     
     gini_gain = gini_p - (proportion_left*gini_l + proportion_right*gini_r)
-    
-    
+        
     return gini_gain
+
+# cpdef double gini_index(list left, list right):
+#     cdef:
+#         double purity = 0.0
+#         double class_ratio
+#         list split
+#         ndarray[int_t, ndim=1] class_counts, unique_classes
+#         int total_classes, bi, i
+
+#     for bi in range(2):
+#         if bi == 0:
+#             split = left
+#         else:
+#             split = right
+        
+#         class_counts = np.bincount(split[:, -1].astype('int'))
+#         unique_classes = np.array(np.nonzero(class_counts))[0]
+        
+#         for i in range(unique_classes.shape[0]):
+#             class_ratio = <double>class_counts[unique_classes[i]] / split.shape[0]
+#             purity += class_ratio * (1 - class_ratio)
+    
+#     return purity
 
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
+
 cpdef dict get_best_split(ndarray[float64_t, ndim=2] data, ndarray[int_t, ndim=1] features, dict node_neighbors, 
-                         dict loadings):
+                         dict loadings, dict mean, dict variance):
     cdef:
         # ndarray[double, ndim=1] y_left, y_right
         # ndarray[double, ndim=1] samples_left, samples_right
@@ -131,6 +154,9 @@ cpdef dict get_best_split(ndarray[float64_t, ndim=2] data, ndarray[int_t, ndim=1
                 best_split_dict = {
                                 'feature_index': i_idx,
                                 'split_point': b_split_point, 
+                                'loadings': loadings[f_idx][0],
+                                'mean': mean[f_idx][0], 
+                                'variance': variance[f_idx][0], # taking only first value (value of the selected feature / not neighbors)
                                 # 'left': b_left, 
                                 # 'right': b_right, 
                                 'y_left': y_left,
