@@ -34,6 +34,9 @@ end = time.time()
 print(end-start)
 print(feat)
 
+feat_count = model.get_feature_counts(X_train)
+pd.DataFrame(feat_count).to_csv('feature_count_test', mode='a')
+
 #pd.DataFrame(feat).to_csv('feature_impo_pca_100t10nn_changed_rs.csv')
 
 # simulated_groups = pd.read_excel('simulated_groups.xlsx', sheet_name=0)

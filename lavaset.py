@@ -259,7 +259,7 @@ class RandomForest:
         self.max_samples = max_samples
         # Will store individually trained decision trees
         self.decision_trees = []
-        self.feature_count_sum = np.array()
+        self.feature_count_sum =[]
     
 
     @staticmethod
@@ -353,5 +353,12 @@ class RandomForest:
 
         all_importances = np.mean(all_importances, axis=0, dtype=np.float64)
         return all_importances / np.sum(all_importances)
-
+    
+    def get_feature_counts(self, X):
+        feature_count_sum = np.zeros(X.shape[1])
+        for tree in self.decision_trees:
+            feature_count_per_tree = tree.feature_count
+            feature_count_sum = np.vstack((feature_count_sum, feature_count_per_tree))
+        feature_count_sum = np.sum(feature_count_sum, axis=0, dtype=np.int64)
+        return feature_count_sum
 
