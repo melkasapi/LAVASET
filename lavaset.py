@@ -7,31 +7,32 @@ from random import Random, random, randrange
 from joblib import Parallel, delayed
 from sklearn.metrics import accuracy_score
 import pyximport
+import sys
 pyximport.install()
 from splitting import get_best_split
 
 from cython.parallel import prange, parallel
 
 
-# class Node:
-#     '''
-#     Helper class which implements a single tree node.
-#     '''
-#     def __init__(self, feature=None, threshold=None, 
-#                         data_left=None, data_right=None, 
-#                         gini=None, value=None, 
-#                         gini_dict=None, loadings=None,
-#                         mean=None, variance=None):
-#         self.feature = feature
-#         self.threshold = threshold
-#         self.data_left = data_left
-#         self.data_right = data_right
-#         self.gini = gini
-#         self.value = value
-#         self.gini_dict = gini_dict
-#         self.loadings = loadings
-#         self.mean = mean
-#         self.variance = variance
+class Node:
+    '''
+    Helper class which implements a single tree node.
+    '''
+    def __init__(self, feature=None, threshold=None, 
+                        data_left=None, data_right=None, 
+                        gini=None, value=None, 
+                        gini_dict=None, loadings=None,
+                        mean=None, variance=None):
+        self.feature = feature
+        self.threshold = threshold
+        self.data_left = data_left
+        self.data_right = data_right
+        self.gini = gini
+        self.value = value
+        self.gini_dict = gini_dict
+        self.loadings = loadings
+        self.mean = mean
+        self.variance = variance
 
 def _make_estimator(base_estimator, append=True, random_state=None):
     """Make and configure a copy of the `base_estimator_` attribute.
@@ -53,8 +54,9 @@ class DecisionTree:
     '''
     Class which implements a decision tree classifier algorithm.
     '''
-    def __init__(self, min_samples_split=2, max_depth=1000, random_state=None):
+    def __init__(self, knn=None, min_samples_split=2, max_depth=1000, random_state=None):
         self.min_samples_split = min_samples_split
+        self.knn = knn
         self.max_depth = max_depth
         # self.max_features = max_features
         self.root = None
@@ -84,20 +86,19 @@ class DecisionTree:
         random_instance = np.random.RandomState(self.random_state)
         features_subset = random_instance.randint(0, m, max_features)
         self.feature_count[features_subset] += 1
-        indexes_file = pd.read_csv('~/Documents/cmr_rf/nmr_10nn_index2.csv').to_numpy()
+        # indexes_file = pd.read_csv('~/Documents/cmr_rf/nmr_10nn_index2.csv').to_numpy()
         #indexes_file = pd.read_csv('~/Documents/cmr_rf/nmr_knn_index_10k15k.csv').to_numpy()
         #indexes_file = pd.read_csv('~/Documents/cmr_rf/nmr_50nn_index.csv').to_numpy()
         #indexes_file = pd.read_csv('~/Documents/cmr_rf/nmr_20nn_index.csv').to_numpy()
-
+        indexes_file = self.knn
         mean = dict() # initialize dict holding the mean value of each feature scaled
         variance = dict() # initialize dict holding the variance value of each feature scaled
-        scaler = StandardScaler()
+        scaler = StandardScaler(with_std=False)
         node_neighbors = dict()
         for f_idx in features_subset:
             indeces = indexes_file[f_idx].tolist()
             pca_df = scaler.fit_transform(X[:, indeces])
-            #pca_df = X[:, indeces] # takes value for relevant feature in all training samples
-            #print(pca_df)
+            # pca_df = X[:, indeces] # takes value for relevant feature in all training samples
             pca = PCA(n_components=1)
             X_pca = np.append(X_pca, pca.fit_transform(pca_df), axis=1)
             loadings[f_idx] = np.ravel(pca.components_.T)
@@ -107,9 +108,9 @@ class DecisionTree:
         
         X_pca = X_pca[:, 1:]  
         df_pca = np.concatenate((X_pca, np.array(y).reshape(1, -1).T), axis=1)
-
-        node_dict = {}
+        # node_dict = {}
         node_dict = get_best_split(df_pca, features_subset, node_neighbors, loadings, mean, variance)
+
         #loadings_all = list()
         #loadings_all.append(loadings)
         #print(loadings_all)
@@ -153,17 +154,32 @@ class DecisionTree:
                     depth=depth + 1,
                     # random_state = random_state + 1
                 )
-                node={
-                        'feature':best['predictor'], 
-                        'threshold':best['split_point'], 
-                        'data_left':left, 
-                        'data_right':right, 
-                        'gini':best['gini'],
-                        'gini_dict':best['gini_latent'], 
-                        'loadings':best['loadings'],
-                        'mean':best['mean'],
-                        'variance':best['variance']
-                }
+                # node={
+                #         'feature':best['predictor'], 
+                #         'threshold':best['split_point'], 
+                #         'data_left':left, 
+                #         'data_right':right, 
+                #         'gini':best['gini'],
+                #         'gini_dict':best['gini_latent'], 
+                #         'loadings':best['loadings'],
+                #         'mean':best['mean'],
+                #         'variance':best['variance']
+                return Node(
+                        feature=best['predictor'], 
+                        threshold=best['split_point'], 
+                        data_left=left, 
+                        data_right=right, 
+                        gini=best['gini'], 
+                        gini_dict=best['gini_latent'], 
+                        loadings=best['loadings'],
+                        mean=best['mean'],
+                        variance=best['variance']
+                )
+        # value=Counter(y).most_common(1)[0][0]
+        return Node(
+            value=Counter(y).most_common(1)[0][0]
+        )
+                # }
         node = {
             'value':Counter(y).most_common(1)[0][0]
         }
@@ -185,7 +201,7 @@ class DecisionTree:
 
         self.root = self._build(X, y)
 
-        #self.nodes.append(self.root)
+        self.nodes.append(self.root)
 
         self.update_feature_importances()
         #print(self.feature_count)
@@ -202,22 +218,34 @@ class DecisionTree:
         :param tree: built tree
         :return: float, predicted class
         '''
-#         # Leaf node
-        if tree['value'] != None:
-            return tree['value']
+# #         # Leaf node
+#         if tree['value'] != None:
+#             return tree['value']
         
-         #scaled_x = (x[tree.feature]-tree.mean)/tree.variance # scaling x based on node
+#          #scaled_x = (x[tree.feature]-tree.mean)/tree.variance # scaling x based on node
         
-        # this needs to be multiplied with the loading of feature 
-        feature_value = x[tree['feature']]*(tree['loadings'])
+#         # this needs to be multiplied with the loading of feature 
+#         feature_value = x[tree['feature']]*(tree['loadings'])
+        
+#         # Go to the left
+#         if feature_value <= tree['threshold']:
+#             return self._predict(x=x, tree=tree['data_left'])
+        
+#         # Go to the right
+#         if feature_value > tree['threshold']:
+#             return self._predict(x=x, tree=tree['data_right'])
+
+        if tree.value != None:
+            return tree.value
+        feature_value = x[tree.feature]
         
         # Go to the left
-        if feature_value <= tree['threshold']:
-            return self._predict(x=x, tree=tree['data_left'])
+        if feature_value <= tree.threshold:
+            return self._predict(x=x, tree=tree.data_left)
         
         # Go to the right
-        if feature_value > tree['threshold']:
-            return self._predict(x=x, tree=tree['data_right'])
+        if feature_value > tree.threshold:
+            return self._predict(x=x, tree=tree.data_right)
         
     def predict(self, X):
         '''
@@ -237,9 +265,9 @@ class DecisionTree:
             return None
         self.feature_importances_ = np.zeros(self.n_features_)
         J = len(self.nodes)
-        print(J)
         if J > 0:
-            for j, node in enumerate(self.nodes):
+            for j, node in enumerate(self.nodes[:-1]):
+                print(node)
                 # pd.DataFrame(node).to_csv('leaves_lavaset10v2.csv', mode='a')
                 for var, value in node["gini_latent"].items():
                     self.feature_importances_[var] += value
@@ -252,8 +280,9 @@ class RandomForest:
     '''
     A class that implements Random Forest algorithm from scratch.
     '''
-    def __init__(self, num_trees, min_samples_split=2, max_depth=1000, max_samples=100):
+    def __init__(self, num_trees, knn, min_samples_split=2, max_depth=1000, max_samples=100):
         self.num_trees = num_trees
+        self.knn = knn
         self.min_samples_split = min_samples_split
         self.max_depth = max_depth
         self.max_samples = max_samples
@@ -296,7 +325,7 @@ class RandomForest:
 
     def fit(self, X, y):
         '''
-        Trains a Random Forest classifier.
+        Trains a Random Forest classifier.s
 
         :param X: np.array, features
         :param y: np.array, target
@@ -305,7 +334,7 @@ class RandomForest:
         n_more_dts = self.num_trees - len(self.decision_trees)
         # trees = _make_estimator(DecisionTree(), append=True)
 
-        trees = [_make_estimator(DecisionTree(), append=False)
+        trees = [_make_estimator(DecisionTree(knn=self.knn), append=False)
                 for i in range(n_more_dts)
                 ]
 
@@ -330,7 +359,7 @@ class RandomForest:
         y = []
         for tree in self.decision_trees:
             y.append(tree.predict(X))
-        
+
         #np.savetxt('per_tree_preds_100t10nn_changedrs.txt', np.array(y), delimiter=",")
         
         # Reshape so we can find the most common value
@@ -361,4 +390,5 @@ class RandomForest:
             feature_count_sum = np.vstack((feature_count_sum, feature_count_per_tree))
         feature_count_sum = np.sum(feature_count_sum, axis=0, dtype=np.int64)
         return feature_count_sum
+
 
