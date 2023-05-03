@@ -19,7 +19,7 @@ st = time.time()
 nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
 X = np.array(nmr_peaks.iloc[:, 3:])
 # # y = np.array(nmr_peaks.iloc[:, 1], dtype=int)
-y = pd.read_csv('~/Documents/cmr_rf/LAVASET/testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
+y = pd.read_csv('formate-testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
 # y = np.array(nmr_peaks.iloc[:, 1], dtype=int)
 # # y = pd.read_csv('~/Documents/cmr_rf/LAVASET/testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=int)
 
