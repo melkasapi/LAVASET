@@ -1,0 +1,14 @@
+#import numpy as np
+#cimport numpy as cnp
+
+#cdef extern from "quickie.h":
+    #cdef void quicksort[TLabel](double *data, TLabel *labels, int left, int right)
+
+#cdef extern from "GBCP.h":
+    #cdef void GBCP(int M, int N, double* Labels, double* Data, int minleaf, int num_labels, double* bcvar, double* bcval)
+
+#cpdef tuple gbcpp(int M, int N, double[:] Labels, double[:,:] Data, int minleaf, int num_labels, double[:] bcvar, double[:] bcval):
+    #GBCP(M, N, &Labels[0], &Data[0,0], minleaf, num_labels, &bcvar[0], &bcval[0])
+    #return np.array([bcvar[0]]), np.array([bcval[0]])
+
+# GBCP_wrapper.pyx
