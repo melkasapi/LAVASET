@@ -43,8 +43,8 @@ cpdef double gini_index(list y_left, list y_right):
     
     parent_node_y = y_left+y_right
     
-    proportion_left = len(y_left) / len(parent_node_y)
-    proportion_right = len(y_right) / len(parent_node_y)
+    proportion_left = <double>len(y_left) / len(parent_node_y)
+    proportion_right = <double>len(y_right) / len(parent_node_y)
     p_parent = (np.bincount(np.array(parent_node_y, dtype=np.int64)))/len(parent_node_y)
 
     p_left = (np.bincount(np.array(y_left, dtype=np.int64)))/len(y_left)
@@ -57,29 +57,6 @@ cpdef double gini_index(list y_left, list y_right):
         
     return gini_gain
 
-# cpdef double gini_index(list left, list right):
-#     cdef:
-#         double purity = 0.0
-#         double class_ratio
-#         list split
-#         ndarray[int_t, ndim=1] class_counts, unique_classes
-#         int total_classes, bi, i
-
-#     for bi in range(2):
-#         if bi == 0:
-#             split = left
-#         else:
-#             split = right
-        
-#         class_counts = np.bincount(split[:, -1].astype('int'))
-#         unique_classes = np.array(np.nonzero(class_counts))[0]
-        
-#         for i in range(unique_classes.shape[0]):
-#             class_ratio = <double>class_counts[unique_classes[i]] / split.shape[0]
-#             purity += class_ratio * (1 - class_ratio)
-    
-#     return purity
-
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -90,7 +67,7 @@ cpdef dict get_best_split(ndarray[float64_t, ndim=2] data, ndarray[int_t, ndim=1
     cdef:
         # ndarray[double, ndim=1] y_left, y_right
         # ndarray[double, ndim=1] samples_left, samples_right
-        list  df_left, df_right, b_left, b_right
+        list  df_left, df_right, b_left, b_right, b_samples_right, b_samples_left, b_y_left, b_y_right
         double split_point, b_split_point, gini
         double b_gini = -1
         int b_predictor, f_idx, predictor, row_i
@@ -145,13 +122,16 @@ cpdef dict get_best_split(ndarray[float64_t, ndim=2] data, ndarray[int_t, ndim=1
             if gini > b_gini:
                 best_neighbors = node_neighbors[f_idx]
                 loading_weight = abs(loadings[f_idx])/sum(abs(loadings[f_idx]))
-                gini_latent=gini*(loadings[f_idx])
+                gini_latent = gini*(loadings[f_idx])
                 gini_dict = dict(zip(best_neighbors, gini_latent))
                 b_split_point, b_predictor = split_point, f_idx
                 # b_left, b_right = df_left.copy(), df_right.copy()
                 #b_gini = loading_weight[0]*gini
                 b_gini = gini
-                best_split_dict = {
+
+        # best_split_dict = {}
+
+    return {
                                 'feature_index': i_idx,
                                 'split_point': b_split_point, 
                                 'loadings': loadings[f_idx][0],
@@ -167,7 +147,4 @@ cpdef dict get_best_split(ndarray[float64_t, ndim=2] data, ndarray[int_t, ndim=1
                                 'gini': b_gini,#gain
                                 'gini_latent': gini_dict
                             }
-        # best_split_dict = {}
-
-    return best_split_dict
 
