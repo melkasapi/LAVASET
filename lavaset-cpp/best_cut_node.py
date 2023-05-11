@@ -1,17 +1,3 @@
-# import numpy as np
-# from GBCP_cython import GBCP_cython
-
-# M = 100
-# N = 10
-# Labels = np.random.randint(1, 4, size=M).astype(float)
-# Data = np.random.rand(M, N).astype(float)
-# minleaf = 5
-# num_labels = 3
-
-# bcvar, bcval = GBCP_cython(M, N, Labels, Data, minleaf, num_labels)
-
-# print(bcvar, bcval)
-
 
 import numpy as np
 from cython_wrapper import gbc_p
