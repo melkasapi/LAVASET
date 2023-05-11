@@ -14,22 +14,25 @@ from joblib import Parallel, delayed
 
 
 st = time.time()
-
-
 nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
 X = np.array(nmr_peaks.iloc[:, 3:])
-# # y = np.array(nmr_peaks.iloc[:, 1], dtype=int)
-y = pd.read_csv('formate-testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
+y = np.array(nmr_peaks.iloc[:, 1], dtype=int)
+# y = pd.read_csv('~/Documents/cmr_rf/LAVASET/lavaset-cpp/formate-testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
+# y = pd.read_excel('simulated_groups.xlsx').iloc[:, 1]
+if np.unique(y).any() != 0:
+    y = np.where(y == 1, 0, 1).astype(np.double)
+
 # y = np.array(nmr_peaks.iloc[:, 1], dtype=int)
 # # y = pd.read_csv('~/Documents/cmr_rf/LAVASET/testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=int)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=180)
 
+
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
-def cartree(Data, Labels, minparent=2, minleaf=1, nvartosample=None, method='g', weights=None):
+def cartree(Data, Labels, random_state, minparent=2, minleaf=1, nvartosample=None, method='g', weights=None):
     if nvartosample is None:
         nvartosample = Data.shape[1]
    
@@ -63,7 +66,8 @@ def cartree(Data, Labels, minparent=2, minleaf=1, nvartosample=None, method='g',
         max_label = None
 
     current_node = 0
-    
+    random_state=random_state
+
     while nodeflags[current_node] == 1:
         free_node = np.where(nodeflags == 0)[0][0]
         currentDataIndx = nodeDataIndx[current_node]# samples in this node 
@@ -77,20 +81,17 @@ def cartree(Data, Labels, minparent=2, minleaf=1, nvartosample=None, method='g',
             nodeCutValue[current_node] = 0
         else:
             if len(currentDataIndx) >= minparent:
-                node_var = np.random.permutation(m)
-                node_var = node_var[:nvartosample]
+                # node_var = np.random.permutation(m)
+                # node_var = node_var[:nvartosample]
                 # node_var = range(m)
+               
+                random_instance = np.random.RandomState(random_state)
+                node_var = random_instance.choice(m, nvartosample, replace=False)
                 giniii[node_var,0]+=1
-
-                # random_state=10
-                # random_instance = np.random.RandomState(random_state)
-                # node_var = random_instance.choice(m, nvartosample, replace=False)
-                # print(node_var, 'node_var')
                 if weights is not None:
                     Wcd = weights[currentDataIndx]
                 else:
                     Wcd = None
-                
                 bestCutVar, bestCutValue = best_cut_node(method, Data[currentDataIndx][:, node_var], Labels[currentDataIndx], minleaf, max_label)
                 # bestCutVar = int(bestCutVar_before - 1) # only needed if using cpp implementation
                 if bestCutVar != -1:
@@ -136,7 +137,8 @@ def cartree(Data, Labels, minparent=2, minleaf=1, nvartosample=None, method='g',
                 elif method.lower() == 'r':
                     nodelabel[current_node] = np.mean(Labels[currentDataIndx])
 
-        current_node += 1
+        current_node+=1
+        random_state+=1
     # feat_impo = np.array(list(gini_dict.values()), dtype=np.float64)
     # feat_impo /= np.sum(feat_impo)
     feat_impo = giniii
@@ -191,7 +193,7 @@ def Stochastic_Bosque(Data, Labels, **kwargs):
         random_instance = np.random.RandomState(random_state)
         TDindx = random_instance.choice(len(Labels), nsamtosample, replace=False)
 
-        Random_ForestT = cartree(Data[TDindx,:], Labels[TDindx], minparent=minparent, minleaf=minleaf, method=method, nvartosample=nvartosample, weights=weights)
+        Random_ForestT = cartree(Data[TDindx,:], Labels[TDindx], random_state=random_state, minparent=minparent, minleaf=minleaf, method=method, nvartosample=nvartosample, weights=weights)
         Random_ForestT_dict = {'tree_cut_var': Random_ForestT[0], 'tree_cut_val': Random_ForestT[1],
                                 'tree_nodechilds': Random_ForestT[2], 'tree_nodelabel': Random_ForestT[3], 
                                 'feature_importances': Random_ForestT[4],
@@ -209,34 +211,7 @@ def Stochastic_Bosque(Data, Labels, **kwargs):
 
         return Random_ForestT_dict
 
-    # for i in range(ntrees):
-    #     print(i)
-    #     random_instance = np.random.RandomState(random_state)
-    #     TDindx = random_instance.choice(len(Labels), nsamtosample, replace=False)
-    #     # TDindx = np.random.choice(len(Labels), size=nsamtosample, replace=True)
-    #     # TDindx = np.unique(TDindx)
-
-    #     Random_ForestT = cartree(Data[TDindx,:], Labels[TDindx], minparent=minparent, minleaf=minleaf, method=method, nvartosample=nvartosample, weights=weights)
-    #     Random_ForestT_dict = {'tree_cut_var': Random_ForestT[0], 'tree_cut_val': Random_ForestT[1],
-    #                             'tree_nodechilds': Random_ForestT[2], 'tree_nodelabel': Random_ForestT[3], 'feature_importances': Random_ForestT[4],
-    #                             'method': method, 'oobe':oobe}
-    #     random_state+=1
-    #     if oobe == 'y':
-    #         NTD = np.setdiff1d(np.arange(len(Labels)), TDindx)
-    #         tree_output = eval_cartree(Data[NTD,:], Random_ForestT)
-
-    #         if method in ['c', 'g']:
-    #             oobe_val = np.mean(tree_output != Labels[NTD])
-    #         elif method == 'r':
-    #             oobe_val = np.mean(np.square(tree_output - Labels[NTD]))
-
-    #         Random_ForestT_dict['oobe'] = oobe_val
-
-    #     Random_Forest.append(Random_ForestT_dict)
-
-    # return Random_Forest
-
-    random_state = 0
+    random_state = 90
     Random_Forest = Parallel(n_jobs=-1)(delayed(build_tree)(i, random_state+i, Data, Labels, 
     nsamtosample, minparent, minleaf, method, nvartosample, weights, oobe) for i in range(ntrees))
 
@@ -297,6 +272,8 @@ def eval_Stochastic_Bosque(Data, Random_Forest, oobe=False):
 y_pred, votes, impo = eval_Stochastic_Bosque(X_test, RF, oobe=False)
 en = time.time()
 print(en-st)
+pd.DataFrame(impo).to_csv('classicRF_feature_impo_100t10nnIBSvsHC.csv')
+
 # pd.DataFrame(impo).to_csv('feature_impo_100t10nn_formate_allgini_newcpp.csv')
 
 y_pred = np.array(eval_Stochastic_Bosque(X_test, RF, oobe=False)[0], dtype=int)

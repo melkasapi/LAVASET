@@ -1,12 +1,12 @@
 
-from asyncio.staggered import staggered_race
+
 from best_cut_node import best_cut_node
 import numpy as np
 from sklearn import datasets
 from sklearn.neighbors import KDTree
 from sklearn.decomposition import PCA
 import pandas as pd
-from scipy.linalg import svd
+from numpy.linalg import svd
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import pandas as pd
@@ -37,24 +37,17 @@ st = time.time()
 
 nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
 X = np.array(nmr_peaks.iloc[:, 3:])
-# y = np.array(nmr_peaks.iloc[:, 1], dtype=int)
-y = pd.read_csv('formate-testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
+y = np.array(nmr_peaks.iloc[:, 1], dtype=np.double)
+# y = pd.read_csv('~/Documents/cmr_rf/LAVASET/lavaset-cpp/formate-testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
+# y = pd.read_excel('simulated_groups.xlsx').iloc[:, 1]
+if np.unique(y).any() != 0:
+    y = np.where(y == 1, 0, 1).astype(np.double)
 nn = knn_calculation(nmr_peaks.columns[3:], 10)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=180)
+print(y_test)
 
-# scaler = StandardScaler(with_std=False)
-# X_train = scaler.fit_transform(X_train)
-# X_test = scaler.transform(X_test)
-
-
-# U, S, Vt = svd(X_train)
-# left_singular_vector = U[:, 0]
-# pca = PCA(n_components=1)
-# scores = pca.fit_transform(X_train)
-
-
-def cartree(Data, Labels, knn, minparent=2, minleaf=1, nvartosample=None, method='g', weights=None):
+def cartree(Data, Labels, knn, random_state, minparent=2, minleaf=1, nvartosample=None, method='g', weights=None):
     if nvartosample is None:
         nvartosample = Data.shape[1]
    
@@ -96,9 +89,10 @@ def cartree(Data, Labels, knn, minparent=2, minleaf=1, nvartosample=None, method
         max_label = len(unique_labels)
     else:
         max_label = None
-
     current_node = 0
+    random_state = random_state
     while nodeflags[current_node] == 1:
+
         free_node = np.where(nodeflags == 0)[0][0]
         currentDataIndx = nodeDataIndx[current_node]# samples in this node 
 
@@ -113,10 +107,10 @@ def cartree(Data, Labels, knn, minparent=2, minleaf=1, nvartosample=None, method
             if len(currentDataIndx) >= minparent:
                 # print('samples',len(currentDataIndx))
 
-                node_var = np.random.permutation(m)
-                node_var = node_var[:nvartosample]
-                # random_instance = np.random.RandomState(random_state)
-                # node_var = random_instance.choice(m, nvartosample, replace=False)
+                # node_var = np.random.permutation(m)
+                # node_var = node_var[:nvartosample]
+                random_instance = np.random.RandomState(random_state)
+                node_var = random_instance.choice(m, nvartosample, replace=False)
                 giniii[node_var,0]+=1
 
                 if weights is not None:
@@ -135,33 +129,31 @@ def cartree(Data, Labels, knn, minparent=2, minleaf=1, nvartosample=None, method
 
                 for i, feat in enumerate(node_var):
                     NV[i] = knn[feat] # a dict of all the variables picked for this node (node_var) and thier neighbors in the form of list (the first element of each list is the feature originally picked) 
-                    scaler = StandardScaler()
-                    pca_df = scaler.fit_transform(Data[currentDataIndx][:, NV[i]])
-                    # pca = PCA(n_components=1)
-                    # scores = np.append(scores, pca.fit_transform(pca_df), axis=1)
-                    covariance_matrix = np.cov(pca_df, rowvar=False)
+                    matrix = Data[currentDataIndx][:, NV[i]]
+                    matrix_mean = np.mean(matrix, axis=0)
+                    matrix_std = np.std(matrix, axis=0, ddof=1)
+                    pca_df = (matrix - matrix_mean) / matrix_std
 
-                    # U, S, Vt = svd(covariance_matrix)
-                    # scores = np.vstack((scores, pca_df @ U[:,0]))
-                    # S_diag = np.zeros((len(S), len(S)))
-                    # np.fill_diagonal(S_diag, S)
-                    # loadings = Vt.T @ np.diag(S_diag)
                     # Perform the Singular Value Decomposition (SVD)
-                    U, S, Vt = svd(pca_df, full_matrices=False)
-                    
-                    # The left singular vectors are the principal components
-                    left_singular_vector = U[:, 0]
-                    scores = np.vstack((scores, left_singular_vector))
-                    # Compute the loadings by multiplying the right singular vectors (Vt) with the diagonal matrix of singular values (S)
-                    loadings = Vt.T @ np.diag(S)
-                    
-                    # Return the loadings of the first principal component
-                    loadings =  loadings[:, 0]
-                    P[i] = loadings
-                    MC[i] = np.ravel(scaler.mean_)
-                    VA[i] = np.ravel(scaler.var_)
-                scores = scores[1:, :].T # removing the initialized 0s
+                    u, s, vt = svd(pca_df, full_matrices=False)
+                    U = np.matrix(u[:,0])
 
+                    loadings = np.conj(U@pca_df)
+                    lsv = np.array((pca_df@loadings.T)).ravel()
+                    # The left singular vectors are the principal components
+                    left_singular_vector = u[:, 0]
+                    scores = np.vstack((scores, lsv))
+                    # Compute the loadings by multiplying the right singular vectors (Vt) with the diagonal matrix of singular values (S)
+                    # loadings = Vt.T @ np.diag(S)
+                    # loadings = vt @ np.diag(s)
+                    # loadings = Vt[0, :]
+
+                    # Return the loadings of the first principal component
+                    # loadings =  loadings[:, 0]
+                    P[i] = np.array(loadings).ravel()
+                    MC[i] = matrix_mean #np.ravel(scaler.mean_)
+                    VA[i] = matrix_std #np.ravel(scaler.var_)
+                scores = scores[1:, :].T
                 bestCutVar, bestCutValue = best_cut_node(method, scores, Labels[currentDataIndx], minleaf, max_label)
                 #bestCutVar here is the index from the node_var variables 
                 # bestCutVar = int(bestCutVar_before - 1) # only needed if using cpp implementation
@@ -213,7 +205,10 @@ def cartree(Data, Labels, knn, minparent=2, minleaf=1, nvartosample=None, method
                     nodelabel[current_node] = unique_labels[leaf_label]
                 elif method.lower() == 'r':
                     nodelabel[current_node] = np.mean(Labels[currentDataIndx])
-        current_node+= 1
+        current_node+=1
+        random_state+=1
+
+        
     # feat_impo = giniii[:, 2]
     # feat_impo /= np.sum(feat_impo)
     feat_impo = giniii
@@ -228,7 +223,7 @@ def cartree(Data, Labels, knn, minparent=2, minleaf=1, nvartosample=None, method
 
 def eval_cartree(Data, cut_var, cut_val, nodechilds, nodelabel, RelatedCutVar, CenteredCutVar, VarianceCutVar, LoadingsCutVar):
     n, m = Data.shape
-    tree_output = np.zeros((n,1))
+    tree_output = np.zeros(n)
     prox=np.zeros(n)
 
     # feature_importances = dict(zip(range(m), feat_impo))
@@ -238,10 +233,10 @@ def eval_cartree(Data, cut_var, cut_val, nodechilds, nodelabel, RelatedCutVar, C
         while nodechilds[current_node] != 0:
             cvar = RelatedCutVar[current_node]
             Centered = (Data[i, cvar] - CenteredCutVar[current_node]) / VarianceCutVar[current_node]
-            scores = np.dot(Centered, LoadingsCutVar[current_node])
+            score = np.dot(Centered, LoadingsCutVar[current_node])
 
             # if np.all(scores <= cut_val[current_node]):
-            if scores <= cut_val[current_node]:
+            if score <= cut_val[current_node]:
                 current_node = int(nodechilds[current_node])
             else:
                 current_node = int(nodechilds[current_node]+1)
@@ -272,7 +267,7 @@ def Stochastic_Bosque(Data, Labels, **kwargs):
         random_instance = np.random.RandomState(random_state)
         TDindx = random_instance.choice(len(Labels), nsamtosample, replace=False)
 
-        Random_ForestT = cartree(Data[TDindx,:], Labels[TDindx], knn=nn, minparent=minparent, minleaf=minleaf, method=method, nvartosample=nvartosample, weights=weights)
+        Random_ForestT = cartree(Data[TDindx,:], Labels[TDindx], knn=nn, random_state = random_state, minparent=minparent, minleaf=minleaf, method=method, nvartosample=nvartosample, weights=weights)
         Random_ForestT_dict = {'tree_cut_var': Random_ForestT[0], 'tree_cut_val': Random_ForestT[1],
                                 'tree_nodechilds': Random_ForestT[2], 'tree_nodelabel': Random_ForestT[3], 'feature_importances': Random_ForestT[4],
                                 'RelatedCutVar': Random_ForestT[5], 'CenteredCutVar':Random_ForestT[6], 
@@ -291,33 +286,7 @@ def Stochastic_Bosque(Data, Labels, **kwargs):
 
         return Random_ForestT_dict
 
-    # for i in range(ntrees):
-    #     print(i)
-    #     random_instance = np.random.RandomState(random_state)
-    #     TDindx = random_instance.choice(len(Labels), nsamtosample, replace=False)
-    #     # TDindx = np.random.choice(len(Labels), size=nsamtosample, replace=True)
-    #     # TDindx = np.unique(TDindx)
-
-    #     Random_ForestT = cartree(Data[TDindx,:], Labels[TDindx], knn=nn, minparent=minparent, minleaf=minleaf, method=method, nvartosample=nvartosample, weights=weights)
-    #     Random_ForestT_dict = {'tree_cut_var': Random_ForestT[0], 'tree_cut_val': Random_ForestT[1],
-    #                             'tree_nodechilds': Random_ForestT[2], 'tree_nodelabel': Random_ForestT[3], 'feature_importances': Random_ForestT[4],
-    #                             'RelatedCutVar': Random_ForestT[5], 'CenteredCutVar':Random_ForestT[6], 
-    #                             'VarianceCutVar': Random_ForestT[7], 'LoadingsCutVar': Random_ForestT[8],
-    #                             'method': method, 'oobe':oobe}
-    #     random_state+=1
-    #     if oobe == 'y':
-    #         NTD = np.setdiff1d(np.arange(len(Labels)), TDindx)
-    #         tree_output = eval_cartree(Data[NTD,:], Random_ForestT)
-
-    #         if method in ['c', 'g']:
-    #             oobe_val = np.mean(tree_output != Labels[NTD])
-    #         elif method == 'r':
-    #             oobe_val = np.mean(np.square(tree_output - Labels[NTD]))
-
-    #         Random_ForestT_dict['oobe'] = oobe_val
-
-    #     Random_Forest.append(Random_ForestT_dict)
-    random_state = 0
+    random_state = 90
     Random_Forest = Parallel(n_jobs=-1)(delayed(build_tree)(i, random_state+i, Data, Labels, 
     nsamtosample, nn, minparent, minleaf, method, nvartosample, weights, oobe) for i in range(ntrees))
 
@@ -347,12 +316,11 @@ def eval_Stochastic_Bosque(Data, Random_Forest, oobe=False):
     # all_importances = np.zeros(Data.shape[1])
     all_importances = np.zeros((Data.shape[1], 3))
     for i, tree in enumerate(Random_Forest):
-        cartree_output =  eval_cartree(Data, Random_Forest[i]['tree_cut_var'], Random_Forest[i]['tree_cut_val'],Random_Forest[i]['tree_nodechilds'], 
+        f_votes[i, :] =  eval_cartree(Data, Random_Forest[i]['tree_cut_var'], Random_Forest[i]['tree_cut_val'],Random_Forest[i]['tree_nodechilds'], 
         Random_Forest[i]['tree_nodelabel'], Random_Forest[i]['RelatedCutVar'], 
-        Random_Forest[i]['CenteredCutVar'], Random_Forest[i]['VarianceCutVar'], Random_Forest[i]['LoadingsCutVar'])
+        Random_Forest[i]['CenteredCutVar'], Random_Forest[i]['VarianceCutVar'], Random_Forest[i]['LoadingsCutVar']).ravel()
         # f_votes[i,:] = (eval_cartree(Data, Random_Forest[i]['tree_cut_var'], Random_Forest[i]['tree_cut_val'],Random_Forest[i]['tree_nodechilds'], 
         # Random_Forest[i]['tree_nodelabel'])).ravel()
-        f_votes[i, :] = cartree_output[:, :5].ravel()
         oobe_values[i] = tree['oobe']
         importance_per_tree = np.array(Random_Forest[i]['feature_importances'])
         all_importances += importance_per_tree
@@ -381,8 +349,7 @@ def eval_Stochastic_Bosque(Data, Random_Forest, oobe=False):
 en = time.time()
 print(en-st)
 y_pred, votes, impo = eval_Stochastic_Bosque(X_test, RF, oobe=False)
-# pd.DataFrame(impo).to_csv('feature_impo_pca_100t10nn_formate_allgini_new_pca.csv')
-
+pd.DataFrame(impo).to_csv('lavaset_feature_impo_100t10nnIBSvsHC.csv')
 print(y_pred)
 print(accuracy_score(y_test, np.array(y_pred, dtype=int)))
 #minparent=2, minleaf=1, nvartosample=140,ntrees=50, nsamtosample=100, method='g', oobe='n', weights=None))
