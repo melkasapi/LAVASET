@@ -5,8 +5,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import random
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import time
+import csv
 from joblib import Parallel, delayed
 
 
@@ -15,8 +16,8 @@ st = time.time()
 nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
 X = np.array(nmr_peaks.iloc[:, 3:])
 y = np.array(nmr_peaks.iloc[:, 1], dtype=int)
-y = pd.read_csv('~/Documents/cmr_rf/LAVASET/lavaset-cpp/formate-testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
-# y = pd.read_excel('simulated_groups.xlsx').iloc[:, 1]
+# y = pd.read_csv('~/Documents/cmr_rf/LAVASET/lavaset-cpp/formate-testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
+# y = pd.read_excel('ethanol-uracil-testing/simulated_groups.xlsx').iloc[:, 1]
 if np.unique(y).any() != 0:
     y = np.where(y == 1, 0, 1).astype(np.double)
 
@@ -89,13 +90,18 @@ class StochasticBosque:
             else:
                 if len(currentDataIndx) >= minparent:
                     random_instance = np.random.RandomState(random_state)
-                    node_var = random_instance.choice(m, nvartosample, replace=False)
+                    # node_var = random_instance.permutation(range(0,m))[:nvartosample]
+
+
+                    node_var = np.random.permutation(range(0,m))[:nvartosample]
+
                     giniii[node_var,0]+=1
                     if weights is not None:
                         Wcd = weights[currentDataIndx]
                     else:
                         Wcd = None
                     bestCutVar, bestCutValue = best_cut_node(method, Data[currentDataIndx][:, node_var], Labels[currentDataIndx], minleaf, max_label)
+                    random_state+=1
                     if bestCutVar != -1:
 
                         nodeCutVar[current_node] = node_var[bestCutVar]
@@ -248,16 +254,30 @@ class StochasticBosque:
             all_importances += importance_per_tree
         return all_importances
 
-sb = StochasticBosque(ntrees=10, nvartosample='sqrt')
-RF = sb.fit_sb(X_train, y_train, random_state=20) 
+results = []
+for i in range(0, 20):
+    print('random_state', i)
+    sb = StochasticBosque(ntrees=100, nvartosample='sqrt', nsamtosample=150)
+    RF = sb.fit_sb(X_train, y_train, random_state=i)   
+    y_pred, votes = sb.predict_sb(X_test, RF, oobe=False)
+    accuracy = accuracy_score(y_test, np.array(y_pred, dtype=int))
+    precision = precision_score(y_test, np.array(y_pred, dtype=int), average='weighted')
+    recall = recall_score(y_test, np.array(y_pred, dtype=int), average='weighted')
+    f1 = f1_score(y_test, np.array(y_pred, dtype=int), average='weighted')
 
-y_pred, votes = sb.predict_sb(X_test, RF, oobe=False)
-print(pd.DataFrame(sb.feature_evaluation(X_train, RF)))
+    result = {'Random State': i, 'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1 Score': f1}
+    results.append(result)
+    pd.DataFrame(sb.feature_evaluation(X_train, RF)).to_csv(f'classicRF_feature_impo_100t10nnIBSvsHC_random_state{i}v2.csv')
+
+print(results)
+fields = ['Random State', 'Accuracy', 'Precision', 'Recall', 'F1 Score']
 en = time.time()
 print(en-st)
-# pd.DataFrame(impo).to_csv('classicRF_feature_impo_100t10nnIBSvsHC.csv')
+with open('classicRF_metrics_100t10nnIBSvsHCv2.csv', 'w', newline='') as file:
+    writer = csv.DictWriter(file, fieldnames=fields)
+    writer.writeheader()  # Write header
+    writer.writerows(results)  # Write multiple rows
 
 # pd.DataFrame(impo).to_csv('feature_impo_100t10nn_formate_allgini_newcpp.csv')
 # print(y_pred)
-print(accuracy_score(y_test, np.array(y_pred, dtype=int)))
 #minparent=2, minleaf=1, nvartosample=140,ntrees=50, nsamtosample=100, method='g', oobe='n', weights=None))

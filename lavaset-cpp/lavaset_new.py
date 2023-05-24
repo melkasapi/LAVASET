@@ -1,5 +1,4 @@
 
-
 from best_cut_node import best_cut_node
 import numpy as np
 from sklearn import datasets
@@ -11,35 +10,36 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import random
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import time
 from joblib import Parallel, delayed
+import csv
 
 
+# st = time.time()
 
-st = time.time()
+# # iris = datasets.load_iris()
+# # X = iris.data[:100]  
+# # y = np.array(iris.target[:100], dtype=np.double)
 
-# iris = datasets.load_iris()
-# X = iris.data[:100]  
-# y = np.array(iris.target[:100], dtype=np.double)
-
-nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
-X = np.array(nmr_peaks.iloc[:, 3:])
+# nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
+# # cmr = pd.read_csv('~/Documents/cmr_rf/RBHHCM_HC_cmr_1273.csv')
+# X = np.array(nmr_peaks.iloc[:, 3:])
 # y = np.array(nmr_peaks.iloc[:, 1], dtype=np.double)
-y = pd.read_csv('~/Documents/cmr_rf/LAVASET/lavaset-cpp/formate-testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
-# y = pd.read_excel('simulated_groups.xlsx').iloc[:, 1]
-if np.unique(y).any() != 0:
-    y = np.where(y == 1, 0, 1).astype(np.double)
-# nn = knn_calculation(nmr_peaks.columns[3:], 10)
+# # y = pd.read_csv('~/Documents/cmr_rf/LAVASET/lavaset-cpp/formate-testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
+# # y = pd.read_excel('ethanol-uracil-testing/simulated_groups.xlsx').iloc[:, 1]
+# if np.unique(y).any() != 0:
+#     y = np.where(y == 1, 0, 1).astype(np.double)
+# # nn = knn_calculation(nmr_peaks.columns[3:], 1s0)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=180)
-print(y_test)
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=180)
+# print(y_test)
 
 
 class LAVASET: 
 
     def __init__(self, n_neigh, minparent=2, minleaf=1, nvartosample=None, ntrees=100, nsamtosample=None, method='g', oobe=False, weights=None):
-        self.n_neigh = n_neigh
+        self.n_neigh = n_neigh+1
         self.minparent = minparent
         self.minleaf = minleaf
         self.nvartosample = nvartosample
@@ -71,7 +71,6 @@ class LAVASET:
 
         nodeCutVar = np.zeros(int(L))
         nodeCutValue = np.zeros(int(L))
-
         RelatedCutVar={key: np.zeros(self.n_neigh) for key in range(L)}
         CenteredCutVar={key: np.zeros(self.n_neigh) for key in range(L)}
         VarianceCutVar={key: np.zeros(self.n_neigh) for key in range(L)}
@@ -106,7 +105,12 @@ class LAVASET:
             else:
                 if len(currentDataIndx) >= minparent:
                     random_instance = np.random.RandomState(random_state)
-                    node_var = random_instance.choice(m, nvartosample, replace=False)
+                    # node_var = random_instance.randint(0, m, nvartosample)
+                    
+                    # node_var = random_instance.permutation(range(0,m))[:nvartosample]
+                    node_var = np.random.permutation(range(0,m))[:nvartosample]
+
+
                     giniii[node_var,0]+=1
 
                     if weights is not None:
@@ -120,7 +124,7 @@ class LAVASET:
                     scores = np.zeros(currentDataIndx.shape[0])
 
                     for i, feat in enumerate(node_var):
-                        NV[i] = knn[feat] # a dict of all the variables picked for this node (node_var) and thier neighbors in the form of list (the first element of each list is the feature originally picked) 
+                        NV[i] = knn[feat] # a dict of all the variables picked for s node (node_var) and their neighbors in the form of list (the first element of each list is the feature originally picked) 
                         matrix = Data[currentDataIndx][:, NV[i]]
                         matrix_mean = np.mean(matrix, axis=0)
                         matrix_std = np.std(matrix, axis=0, ddof=1)
@@ -138,6 +142,8 @@ class LAVASET:
                         VA[i] = matrix_std #np.ravel(scaler.var_)
                     scores = scores[1:, :].T
                     bestCutVar, bestCutValue = best_cut_node(method, scores, Labels[currentDataIndx], minleaf, max_label)
+                    bestCutVar = int(bestCutVar)
+                    random_state+=1
                     #bestCutVar here is the index from the node_var variables 
                     if bestCutVar != -1:
                         nodeCutVar[current_node] = node_var[bestCutVar] # actual feature name 
@@ -214,7 +220,7 @@ class LAVASET:
         return tree_output
 
     def build_tree(self, i, random_state, Data, Labels, knn, nsamtosample, minparent, minleaf, method, nvartosample, weights, oobe):
-        print(i)
+        print(f'building tree {i}')
         random_instance = np.random.RandomState(random_state)
         TDindx = random_instance.choice(len(Labels), nsamtosample, replace=False)
 
@@ -226,7 +232,9 @@ class LAVASET:
                                 'method': method, 'oobe':oobe}
         if oobe:
             NTD = np.setdiff1d(np.arange(len(Labels)), TDindx)
-            tree_output = self.tree_predict(Data[NTD,:], Random_ForestT)
+            tree_output = self.tree_predict(Data[NTD,:], Random_ForestT_dict['tree_cut_var'], Random_ForestT_dict['tree_cut_val'],Random_ForestT_dict['tree_nodechilds'], 
+            Random_ForestT_dict['tree_nodelabel'], Random_ForestT_dict['RelatedCutVar'], 
+            Random_ForestT_dict['CenteredCutVar'], Random_ForestT_dict['VarianceCutVar'], Random_ForestT_dict['LoadingsCutVar'])
 
             if method in ['c', 'g']:
                 oobe_val = np.mean(tree_output != Labels[NTD])
@@ -252,13 +260,13 @@ class LAVASET:
 
        
         Random_Forest = []
-        Random_Forest = Parallel(n_jobs=-1)(delayed(self.build_tree)(i, random_state+i, Data, Labels, knn,
+        Random_Forest = Parallel(n_jobs=-2)(delayed(self.build_tree)(i, random_state+i, Data, Labels, knn,
         self.nsamtosample, self.minparent, self.minleaf, self.method, self.nvartosample, self.weights, self.oobe) for i in range(self.ntrees))
 
         return Random_Forest
 
 
-    def predict_lavaset(self, Data, Random_Forest, oobe=False):
+    def predict_lavaset(self, Data, Random_Forest):
         """
         Returns the output of the ensemble (f_output) as well
         as a [num_treesXnum_samples] matrix (f_votes) containing
@@ -281,23 +289,28 @@ class LAVASET:
             f_votes[i, :] =  self.tree_predict(Data, Random_Forest[i]['tree_cut_var'], Random_Forest[i]['tree_cut_val'],Random_Forest[i]['tree_nodechilds'], 
             Random_Forest[i]['tree_nodelabel'], Random_Forest[i]['RelatedCutVar'], 
             Random_Forest[i]['CenteredCutVar'], Random_Forest[i]['VarianceCutVar'], Random_Forest[i]['LoadingsCutVar']).ravel()
+            oobe_values[i] = Random_Forest[i]['oobe']
         
-        method = Random_Forest[0]['method']
 
+        method = Random_Forest[0]['method']
         if method in ['c', 'g']:
             unique_labels, indices = np.unique(f_votes, return_inverse=True)
             f_votes = indices.reshape((len(Random_Forest), Data.shape[0]))
-            if oobe:
-                weights = ~oobe + oobe * oobe_values
-            else:
-                weights = None
+
+            # if oobe:
+            #     weights = ~oobe + oobe * oobe_values
+            # else:
+            #     weights = None
+            weights = None
             f_output = np.apply_along_axis(lambda x: np.bincount(x, weights=weights, minlength=len(unique_labels)).argmax(),
                                         axis=0, arr=f_votes)
             f_output = unique_labels[f_output]
         elif method == 'r':
             f_output = np.mean(f_votes, axis=0)
+        
+        oobe_mean = np.mean(oobe_values)
+        return f_output, f_votes, oobe_mean
 
-        return f_output, f_votes
     
     def feature_evaluation (self, Data, Random_Forest):
         all_importances = np.zeros((Data.shape[1], 3))
@@ -306,13 +319,33 @@ class LAVASET:
             all_importances += importance_per_tree
         return all_importances
 
-model = LAVASET(ntrees=100, nvartosample='sqrt', n_neigh=10)
-knn = model.knn_calculation(nmr_peaks.columns[3:])
-lavaset = model.fit_lavaset(X_train, y_train, knn, random_state=20)
-y_preds, votes = model.predict_lavaset(X_test, lavaset, oobe=False)
-print(pd.DataFrame(model.feature_evaluation(X_train, lavaset)))
 
-en = time.time()
-print(en-st)
-print(accuracy_score(y_test, np.array(y_preds, dtype=int)))
+# en = time.time()
+# print(en-st)
+
+# results = []
+# for i in [100]:
+#     print('random_state', i)
+#     model = LAVASET(ntrees=i, nvartosample='sqrt', n_neigh=10, nsamtosample=150, oobe=True) # 425taking 1/3 of samples for bootstrapping
+#     knn = model.knn_calculation(nmr_peaks.columns[3:])
+#     # knn = pd.read_csv('~/Documents/cmr_rf/cmr_100nn_index.csv').to_numpy()
+#     lavaset = model.fit_lavaset(X_train, y_train, knn, random_state=10)
+#     y_preds, votes, oobe = model.predict_lavaset(X_test, lavaset, oobe=False)
+#     accuracy = accuracy_score(y_test, np.array(y_preds, dtype=int))
+#     precision = precision_score(y_test, np.array(y_preds, dtype=int))
+#     recall = recall_score(y_test, np.array(y_preds, dtype=int))
+#     f1 = f1_score(y_test, np.array(y_preds, dtype=int))
+
+#     result = {'Random State': i, 'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1 Score': f1, 'oobe': oobe}
+#     results.append(result)
+#     # pd.DataFrame(model.feature_evaluation(X_train, lavaset)).to_csv(f'lavaset_feature_impo_{i}t100nnHCMvsHC1273_random_state10.csv')
+
+# print(results)
+# fields = ['Random State', 'Accuracy', 'Precision', 'Recall', 'F1 Score', 'oobe']
+# en = time.time()
+# print(en-st)
+# with open(f'lavaset_metrics_{i}t100nnHCmvsHC1273.csv', 'w', newline='') as file:
+#     writer = csv.DictWriter(file, fieldnames=fields)
+#     writer.writeheader()  # Write header
+    # writer.writerows(results)  # Write multiple rows
 #minparent=2, minleaf=1, nvartosample=140,ntrees=50, nsamtosample=100, method='g', oobe='n', weights=None))
