@@ -12,25 +12,25 @@ from joblib import Parallel, delayed
 
 
 
-st = time.time()
-nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
-X = np.array(nmr_peaks.iloc[:, 3:])
-y = np.array(nmr_peaks.iloc[:, 1], dtype=int)
-# y = pd.read_csv('~/Documents/cmr_rf/LAVASET/lavaset-cpp/formate-testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
-# y = pd.read_excel('ethanol-uracil-testing/simulated_groups.xlsx').iloc[:, 1]
-if np.unique(y).any() != 0:
-    y = np.where(y == 1, 0, 1).astype(np.double)
-
+# st = time.time()
+# nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
+# X = np.array(nmr_peaks.iloc[:, 3:])
 # y = np.array(nmr_peaks.iloc[:, 1], dtype=int)
-# # y = pd.read_csv('~/Documents/cmr_rf/LAVASET/testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=int)
+# # y = pd.read_csv('~/Documents/cmr_rf/LAVASET/lavaset-cpp/formate-testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
+# # y = pd.read_excel('ethanol-uracil-testing/simulated_groups.xlsx').iloc[:, 1]
+# if np.unique(y).any() != 0:
+#     y = np.where(y == 1, 0, 1).astype(np.double)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=180)
+# # y = np.array(nmr_peaks.iloc[:, 1], dtype=int)
+# # # y = pd.read_csv('~/Documents/cmr_rf/LAVASET/testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=int)
+
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=180)
 
 
-scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
-print(X_train.shape)
+# scaler = StandardScaler()
+# X_train = scaler.fit_transform(X_train)
+# X_test = scaler.transform(X_test)
+# print(X_train.shape)
 
 
 class StochasticBosque:   
@@ -178,10 +178,13 @@ class StochasticBosque:
                                 'method': method, 'oobe':oobe}
         if oobe:
             NTD = np.setdiff1d(np.arange(len(Labels)), TDindx)
-            tree_output = self.tree_predict(Data[NTD,:], Random_ForestT)
+            tree_output = self.tree_predict(Data[NTD,:], Random_ForestT_dict['tree_cut_var'], Random_ForestT_dict['tree_cut_val'],Random_ForestT_dict['tree_nodechilds'], 
+            Random_ForestT_dict['tree_nodelabel'])
 
             if method in ['c', 'g']:
-                oobe_val = np.mean(tree_output != Labels[NTD])
+                # oobe_val = np.mean(tree_output != Labels[NTD])
+                oobe_val = np.sum(tree_output - Labels[NTD] == 0) / len(NTD)
+
             elif method == 'r':
                 oobe_val = np.mean(np.square(tree_output - Labels[NTD]))
 
@@ -203,11 +206,11 @@ class StochasticBosque:
 
 
         Random_Forest = []
-        Random_Forest = Parallel(n_jobs=-1)(delayed(self.build_tree)(i, random_state+i, Data, Labels, self.nsamtosample, self.minparent, self.minleaf, self.method, self.nvartosample, self.weights, self.oobe) for i in range(self.ntrees))
+        Random_Forest = Parallel(n_jobs=-1, backend='threading')(delayed(self.build_tree)(i, random_state+i, Data, Labels, self.nsamtosample, self.minparent, self.minleaf, self.method, self.nvartosample, self.weights, self.oobe) for i in range(self.ntrees))
         return Random_Forest
 
 
-    def predict_sb(self, Data, Random_Forest, oobe=False):
+    def predict_sb(self, Data, Random_Forest):
         """
         Returns the output of the ensemble (f_output) as well
         as a [num_treesXnum_samples] matrix (f_votes) containing
@@ -235,17 +238,18 @@ class StochasticBosque:
         if method in ['c', 'g']:
             unique_labels, indices = np.unique(f_votes, return_inverse=True)
             f_votes = indices.reshape((len(Random_Forest), Data.shape[0]))
-            if oobe:
-                weights = ~oobe + oobe * oobe_values
-            else:
-                weights = None
+            # if oobe:
+            #     weights = ~oobe + oobe * oobe_values
+            # else:
+            weights = None
             f_output = np.apply_along_axis(lambda x: np.bincount(x, weights=weights, minlength=len(unique_labels)).argmax(),
                                         axis=0, arr=f_votes)
             f_output = unique_labels[f_output]
         elif method == 'r':
             f_output = np.mean(f_votes, axis=0)
-
-        return f_output, f_votes
+        
+        oobe_mean = np.mean(oobe_values)
+        return f_output, f_votes, oobe_mean
     
     def feature_evaluation (self, Data, Random_Forest):
         all_importances = np.zeros((Data.shape[1], 3))
@@ -254,29 +258,29 @@ class StochasticBosque:
             all_importances += importance_per_tree
         return all_importances
 
-results = []
-for i in range(0, 20):
-    print('random_state', i)
-    sb = StochasticBosque(ntrees=100, nvartosample='sqrt', nsamtosample=150)
-    RF = sb.fit_sb(X_train, y_train, random_state=i)   
-    y_pred, votes = sb.predict_sb(X_test, RF, oobe=False)
-    accuracy = accuracy_score(y_test, np.array(y_pred, dtype=int))
-    precision = precision_score(y_test, np.array(y_pred, dtype=int), average='weighted')
-    recall = recall_score(y_test, np.array(y_pred, dtype=int), average='weighted')
-    f1 = f1_score(y_test, np.array(y_pred, dtype=int), average='weighted')
+# results = []
+# for i in range(0, 20):
+#     print('random_state', i)
+#     sb = StochasticBosque(ntrees=100, nvartosample='sqrt', nsamtosample=150)
+#     RF = sb.fit_sb(X_train, y_train, random_state=i)   
+#     y_pred, votes = sb.predict_sb(X_test, RF, oobe=False)
+#     accuracy = accuracy_score(y_test, np.array(y_pred, dtype=int))
+#     precision = precision_score(y_test, np.array(y_pred, dtype=int), average='weighted')
+#     recall = recall_score(y_test, np.array(y_pred, dtype=int), average='weighted')
+#     f1 = f1_score(y_test, np.array(y_pred, dtype=int), average='weighted')
 
-    result = {'Random State': i, 'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1 Score': f1}
-    results.append(result)
-    pd.DataFrame(sb.feature_evaluation(X_train, RF)).to_csv(f'classicRF_feature_impo_100t10nnIBSvsHC_random_state{i}v2.csv')
+#     result = {'Random State': i, 'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1 Score': f1}
+#     results.append(result)
+#     pd.DataFrame(sb.feature_evaluation(X_train, RF)).to_csv(f'classicRF_feature_impo_100t10nnIBSvsHC_random_state{i}v2.csv')
 
-print(results)
-fields = ['Random State', 'Accuracy', 'Precision', 'Recall', 'F1 Score']
-en = time.time()
-print(en-st)
-with open('classicRF_metrics_100t10nnIBSvsHCv2.csv', 'w', newline='') as file:
-    writer = csv.DictWriter(file, fieldnames=fields)
-    writer.writeheader()  # Write header
-    writer.writerows(results)  # Write multiple rows
+# print(results)
+# fields = ['Random State', 'Accuracy', 'Precision', 'Recall', 'F1 Score']
+# en = time.time()
+# print(en-st)
+# with open('classicRF_metrics_100t10nnIBSvsHCv2.csv', 'w', newline='') as file:
+#     writer = csv.DictWriter(file, fieldnames=fields)
+#     writer.writeheader()  # Write header
+#     writer.writerows(results)  # Write multiple rows
 
 # pd.DataFrame(impo).to_csv('feature_impo_100t10nn_formate_allgini_newcpp.csv')
 # print(y_pred)
