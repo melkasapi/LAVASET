@@ -14,32 +14,6 @@ import time
 from joblib import Parallel, delayed
 import csv
 
-
-# st = time.time()
-
-# # iris = datasets.load_iris()
-# # X = iris.data[:100]  
-# # y = np.array(iris.target[:100], dtype=np.double)
-
-# nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
-# # mtbls1 = pd.read_csv('MTBLS1.csv')
-# # mtbls24 = pd.read_csv('MTBLS24.csv')
-
-# # X = np.array(mtbls24.iloc[:, 1:])
-# # y = np.array(mtbls24.iloc[:, 0], dtype=np.double)
-# # cmr = pd.read_csv('~/Documents/cmr_rf/RBHHCM_HC_cmr_1273.csv')
-# X = np.array(nmr_peaks.iloc[:, 3:])
-# y = np.array(nmr_peaks.iloc[:, 1], dtype=np.double)
-# # # # y = pd.read_csv('~/Documents/cmr_rf/LAVASET/lavaset-cpp/formate-testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
-# # y = pd.read_excel('ethanol-uracil-testing/simulated_groups.xlsx').iloc[:, 1]
-# # if np.unique(y).any() != 0:
-# #     y = np.where(y == 1, 0, 1).astype(np.double)
-# # # # nn = knn_calculation(nmr_peaks.columns[3:], 1s0)
-
-# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=180)
-# print(y_test)
-
-
 class LAVASET: 
 
     def __init__(self, n_neigh, minparent=2, minleaf=1, nvartosample=None, ntrees=100, nsamtosample=None, method='g', oobe=False, weights=None):
@@ -334,34 +308,3 @@ class LAVASET:
             importance_per_tree = np.array(Random_Forest[i]['feature_importances'])
             all_importances += importance_per_tree
         return all_importances
-
-
-# en = time.time()
-
-# results = []
-# for i in [100]:
-#     print('random_state', i)
-#     model = LAVASET(ntrees=1000, nvartosample='sqrt', n_neigh=18, nsamtosample=180, oobe=True) # 425taking 1/3 of samples for bootstrapping
-#     knn = model.knn_calculation(nmr_peaks.columns[3:])
-#     # knn = pd.read_csv('~/Documents/cmr_rf/cmr_100nn_index.csv').to_numpy()
-#     lavaset = model.fit_lavaset(X_train, y_train, knn, random_state=25)
-#     y_preds, votes, oobe = model.predict_lavaset(X_test, lavaset)
-#     accuracy = accuracy_score(y_test, np.array(y_preds, dtype=int))
-#     precision = precision_score(y_test, np.array(y_preds, dtype=int))
-#     recall = recall_score(y_test, np.array(y_preds, dtype=int))
-#     f1 = f1_score(y_test, np.array(y_preds, dtype=int))
-
-#     result = {'Random State': i, 'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1 Score': f1, 'oobe': oobe}
-#     results.append(result)
-#     print(results)
-    # pd.DataFrame(model.feature_evaluation(X_train, lavaset)).to_csv('lavaset_feature_impo_IBSvsHC_nsamtosample180_1000t18nn_random_state25v3.csv', index=False)
-
-# print(results)
-# fields = ['Random State', 'Accuracy', 'Precision', 'Recall', 'F1 Score', 'oobe']
-# en = time.time()
-# print(en-st)
-# with open(f'lavaset_metrics_{i}t100nnHCmvsHC1273.csv', 'w', newline='') as file:
-#     writer = csv.DictWriter(file, fieldnames=fields)
-#     writer.writeheader()  # Write header
-    # writer.writerows(results)  # Write multiple rows
-#minparent=2, minleaf=1, nvartosample=140,ntrees=50, nsamtosample=100, method='g', oobe='n', weights=None))
