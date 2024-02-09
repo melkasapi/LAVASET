@@ -1,6 +1,7 @@
 from lavaset_new import LAVASET 
 import numpy as np
 import pandas as pd 
+from scipy.spatial import distance_matrix
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
@@ -11,15 +12,17 @@ import os
 from sklearn.model_selection import ParameterGrid
 
 
-# nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
-# X = np.array(nmr_peaks.iloc[:, 3:])
-# y = np.array(nmr_peaks.iloc[:, 1], dtype=np.double)
+nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
+X = np.array(nmr_peaks.iloc[:10, 3:10])
+y = np.array(nmr_peaks.iloc[:10, 1], dtype=np.double)
 
-mtbls1 = pd.read_csv('~/Documents/lavaset_local/mtbls_results/MTBLS1.csv')
-mtbls24 = pd.read_csv('~/Documents/lavaset_local/mtbls_results/MTBLS24.csv')
+# mtbls1 = pd.read_csv('~/Documents/lavaset_local/mtbls_results/MTBLS1.csv')
+# mtbls24 = pd.read_csv('~/Documents/lavaset_local/mtbls_results/MTBLS24.csv')
 
-X = np.array(mtbls1.iloc[:, 1:])
-y = np.array(mtbls1.iloc[:, 0], dtype=np.double)
+# vcg_data = pd.read_excel('~/Documents/lavaset_local/PTBDB_MI_VCG_data.xlsx')
+
+# X = np.array(vcg_data.iloc[:, 5:])
+# y = np.array(vcg_data.iloc[:, 3], dtype=np.double) # acuteMyocardialInfarction
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=180)
 
@@ -37,19 +40,25 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 # st = time.time()
 # param_combinations = list(ParameterGrid(param_grid))
-for i in range(0,100, 5):
-    model = LAVASET(ntrees=10, n_neigh=10, nvartosample='sqrt', nsamtosample=95, oobe=True) # 425taking 1/3 of samples for bootstrapping
-    knn = model.knn_calculation(mtbls1.columns[1:])
+
+dist = distance_matrix(nmr_peaks.iloc[:10, 3:10], nmr_peaks.iloc[:10, 3:10])
+results=[]
+for i in range(0,100, 1):
+    model = LAVASET(ntrees=10, n_neigh=0, distance=3000, nvartosample='sqrt', nsamtosample=int(X_train.shape[0]*0.9), oobe=True) # 425taking 1/3 of samples for bootstrapping
+    knn = model.knn_calculation(dist) ### thisis the input for the knn calcualtion 
+    print(knn)
     lavaset = model.fit_lavaset(X_train, y_train, knn, random_state=i)
     y_preds, votes, oobe = model.predict_lavaset(X_test, lavaset)
     accuracy = accuracy_score(y_test, np.array(y_preds, dtype=int))
     precision = precision_score(y_test, np.array(y_preds, dtype=int))
     recall = recall_score(y_test, np.array(y_preds, dtype=int))
     f1 = f1_score(y_test, np.array(y_preds, dtype=int))
-    result = {'parameters': i, 'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1 Score': f1, 'oobe': oobe}
-    fields = ['parameters', 'Accuracy', 'Precision', 'Recall', 'F1 Score', 'oobe']
-    print(result)
-    # with open(f'lavaset_metrics_impo_mtbls1_nsamtosample95_1000t.csv', 'a', newline='') as file:
+    result = {'random_state': i, 'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1 Score': f1, 'oobe': oobe}
+    fields = ['random_state', 'Accuracy', 'Precision', 'Recall', 'F1 Score', 'oobe']
+    # pd.DataFrame(model.feature_evaluation(X_train, lavaset)).to_csv(f'~/Documents/lavaset_local/vcg_results/lavaset_feature_impo_1000T2nn_VCG_acutemi_rs{i}.csv')
+    # result = {'Random State': i, 'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1 Score': f1, 'oobe': oobe}
+    # results.append(result)
+    # with open(f'lavaset_metrics_1000T2nn_VCG_acutemi_rs.txt', 'a', newline='') as file:
     #     writer = csv.DictWriter(file, fieldnames=fields)
     #     if file.tell() == 0:  # Check if the file is empty
     #         writer.writeheader()  # Write header
