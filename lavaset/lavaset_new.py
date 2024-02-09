@@ -6,41 +6,11 @@ from sklearn.decomposition import PCA
 import pandas as pd
 from numpy.linalg import svd
 from sklearn.preprocessing import StandardScaler, normalize
-from sklearn.model_selection import train_test_split
 import pandas as pd
 import random
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-import time
 from joblib import Parallel, delayed
 import csv
-from scipy.spatial import distance_matrix
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-
-# st = time.time()
-
-# # iris = datasets.load_iris()
-# # X = iris.data[:100]  
-# # y = np.array(iris.target[:100], dtype=np.double)
-
-# nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
-# # mtbls1 = pd.read_csv('MTBLS1.csv')
-# # mtbls24 = pd.read_csv('MTBLS24.csv')
-
-# # X = np.array(mtbls24.iloc[:, 1:])
-# # y = np.array(mtbls24.iloc[:, 0], dtype=np.double)
-# # cmr = pd.read_csv('~/Documents/cmr_rf/RBHHCM_HC_cmr_1273.csv')
-# X = np.array(nmr_peaks.iloc[:, 3:])
-# y = np.array(nmr_peaks.iloc[:, 1], dtype=np.double)
-# # # # y = pd.read_csv('~/Documents/cmr_rf/LAVASET/lavaset-cpp/formate-testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
-# # y = pd.read_excel('ethanol-uracil-testing/simulated_groups.xlsx').iloc[:, 1]
-# # if np.unique(y).any() != 0:
-# #     y = np.where(y == 1, 0, 1).astype(np.double)
-# # # # nn = knn_calculation(nmr_peaks.columns[3:], 1s0)
-
-# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=180)
-# print(y_test)
 
 
 class LAVASET: 
@@ -375,27 +345,3 @@ class LAVASET:
             importance_per_tree = np.array(Random_Forest[i]['feature_importances'])
             all_importances += importance_per_tree
         return all_importances
-
-
-nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
-X = np.array(nmr_peaks.iloc[:10, 3:10])
-y = np.array(nmr_peaks.iloc[:10, 1], dtype=np.double)
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=180)
-
-dist = distance_matrix(nmr_peaks.iloc[:7, 3:10], nmr_peaks.iloc[:7, 3:10])
-results=[]
-for i in range(0,1, 1):
-    model = LAVASET(ntrees=1, n_neigh=0, distance=3000, nvartosample='sqrt', nsamtosample=int(X_train.shape[0]*0.9), oobe=True) # 425taking 1/3 of samples for bootstrapping
-    knn = model.knn_calculation(dist) ### thisis the input for the knn calcualtion 
-    print(knn)
-    lavaset = model.fit_lavaset(X_train, y_train, knn, random_state=i)
-    y_preds, votes, oobe = model.predict_lavaset(X_test, lavaset)
-    accuracy = accuracy_score(y_test, np.array(y_preds, dtype=int))
-    precision = precision_score(y_test, np.array(y_preds, dtype=int))
-    recall = recall_score(y_test, np.array(y_preds, dtype=int))
-    f1 = f1_score(y_test, np.array(y_preds, dtype=int))
-    result = {'random_state': i, 'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1 Score': f1, 'oobe': oobe}
-    fields = ['random_state', 'Accuracy', 'Precision', 'Recall', 'F1 Score', 'oobe']
-    print(result)
-    print(pd.DataFrame(model.feature_evaluation(X_train, lavaset)))
