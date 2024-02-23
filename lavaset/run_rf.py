@@ -1,4 +1,4 @@
-from rf_new import StochasticBosque
+from rf import StochasticBosque
 import numpy as np
 import pandas as pd 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
@@ -6,7 +6,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import time
 import csv 
-
 
 # nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
 # X = np.array(nmr_peaks.iloc[:, 3:])
