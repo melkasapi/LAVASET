@@ -26,8 +26,18 @@ class LAVASET:
         self.oobe = oobe
         self.weights = weights
 
-    def knn_calculation(self, data):
-        if self.distance != False: #### here we take a distance matrix 
+    def knn_calculation(self, data, data_type):
+
+        """ This function calculated the nearest neighbors based on either distance matrix, 1D data (signals or spectra), VCG data,
+        3D data (like images) or any other type of data.
+
+        Args: data (numpy array or pandas dataframe/columns): the data to calculate the nearest neighbors for
+            data_type (str): the type of data to calculate the nearest neighbors for. 
+            It can be either 'distance_matrix', '1D', 'VCG', or 'other' where it calculates the nearest neighbors based on the 2D data input.
+            'distance_matrix' is used for distance matrix input, '1D' is used for 1D data like signals or spectra, 'VCG' is used for VCG data, 
+            and 'other' is used for any other type of data. 
+        """
+        if self.distance != False and data_type=='distance_matrix':       #### here we take a distance matrix 
             nn = NearestNeighbors().fit(data)
             points = nn.radius_neighbors(data, self.distance)[1]
             max_knn = []
@@ -36,13 +46,13 @@ class LAVASET:
             max_knn = max(np.array(max_knn)) ### the maximum number of neighbors based on distance 
             self.n_neigh = max_knn
             return points
-        elif data.ndim == 1:
+        elif data.ndim == 1 and data_type == '1D': ## for 1D data
             X = data.to_numpy(dtype=float)
             X = np.append([X], [data.to_numpy(dtype=float)], axis=0)
             kdtree = KDTree(X.T)
             points = kdtree.query(X.T,self.n_neigh)[1]
             return points
-        elif data.ndim == 2: # for VCG data
+        elif data.ndim == 2 and data_type == 'VCG': # for VCG data
             m = int(data.shape[1])
             original_array = np.arange((data[:, :int(m/3)].shape[1]))
             n = self.n_neigh # Number of points to take from each side
