@@ -46,7 +46,7 @@ results=[]
 for i in range(0,1, 1):
     model = LAVASET(ntrees=100, n_neigh=10, distance=False, nvartosample='sqrt', nsamtosample=180, oobe=True) # 425taking 1/3 of samples for bootstrapping
     # knn = model.knn_calculation(dist) ### this is the input for the knn calcualtion 
-    knn = model.knn_calculation(nmr_peaks.columns[3:], data_type='1D') ### this is the input for the knn calcualtion 
+    knn = model.knn_calculation(nmr_peaks.columns[3:], data_type='1D') ### this is the input for the knn calculation 
     print(knn)
     lavaset = model.fit_lavaset(X_train, y_train, knn, random_state=5)
     y_preds, votes, oobe = model.predict_lavaset(X_test, lavaset)
