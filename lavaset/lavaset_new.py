@@ -10,8 +10,11 @@ import pandas as pd
 import random
 from joblib import Parallel, delayed
 import csv
+<<<<<<< HEAD:lavaset/lavaset.py
 from sklearn.preprocessing import StandardScaler
 
+=======
+>>>>>>> 5deac2fa58c7b0bce4b617c54a67a1c31d74449c:lavaset/lavaset_new.py
 
 class LAVASET: 
 
