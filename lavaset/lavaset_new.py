@@ -1,23 +1,26 @@
 from best_cut_node import best_cut_node
 import numpy as np
 from sklearn import datasets
-from sklearn.neighbors import KDTree
+from sklearn.neighbors import KDTree, NearestNeighbors
 from sklearn.decomposition import PCA
 import pandas as pd
 from numpy.linalg import svd
 from sklearn.preprocessing import StandardScaler, normalize
-from sklearn.model_selection import train_test_split
 import pandas as pd
 import random
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-import time
 from joblib import Parallel, delayed
 import csv
+<<<<<<< HEAD:lavaset/lavaset.py
+from sklearn.preprocessing import StandardScaler
+
+=======
+>>>>>>> 5deac2fa58c7b0bce4b617c54a67a1c31d74449c:lavaset/lavaset_new.py
 
 class LAVASET: 
 
-    def __init__(self, n_neigh, minparent=2, minleaf=1, nvartosample=None, ntrees=100, nsamtosample=None, method='g', oobe=False, weights=None):
+    def __init__(self, n_neigh, distance=False, minparent=2, minleaf=1, nvartosample=None, ntrees=100, nsamtosample=None, method='g', oobe=False, weights=None):
         self.n_neigh = n_neigh+1
+        self.distance = distance
         self.minparent = minparent
         self.minleaf = minleaf
         self.nvartosample = nvartosample
@@ -28,12 +31,41 @@ class LAVASET:
         self.weights = weights
 
     def knn_calculation(self, data):
-        if data.ndim == 1:
+        if self.distance != False: #### here we take a distance matrix 
+            nn = NearestNeighbors().fit(data)
+            points = nn.radius_neighbors(data, self.distance)[1]
+            max_knn = []
+            for i in points:
+                max_knn.append(i.shape[0])
+            max_knn = max(np.array(max_knn)) ### the maximum number of neighbors based on distance 
+            self.n_neigh = max_knn
+            return points
+        elif data.ndim == 1:
             X = data.to_numpy(dtype=float)
             X = np.append([X], [data.to_numpy(dtype=float)], axis=0)
             kdtree = KDTree(X.T)
             points = kdtree.query(X.T,self.n_neigh)[1]
-            return points 
+            return points
+        elif data.ndim == 2: # for VCG data
+            m = int(data.shape[1])
+            original_array = np.arange((data[:, :int(m/3)].shape[1]))
+            n = self.n_neigh # Number of points to take from each side
+            result_array = []
+            for i, num in enumerate(original_array):
+                lower_bound = (num - n) % original_array.shape[0]
+                upper_bound = (num + n + 1) % original_array.shape[0]
+                if upper_bound > lower_bound:
+                    subarray = original_array[lower_bound:upper_bound]
+                else:
+                    subarray = np.concatenate((original_array[lower_bound:], original_array[:upper_bound]))
+                result_array.append(subarray)
+            result_array = np.array(result_array)
+            neighbors = np.zeros((m, 3*result_array[0].shape[0]), dtype=int) # creating neigbrs array for each of the points (all XYZ) and their neighbors
+            for i in range(result_array.shape[0]):
+                neighbors[i] = np.array((result_array[i], result_array[i]+750, result_array[i]+1500)).ravel() 
+                neighbors[i+750] = np.array((result_array[i], result_array[i]+750, result_array[i]+1500)).ravel() # adding 750 to each of the points to get the YZ points too
+                neighbors[i+1500] = np.array((result_array[i], result_array[i]+750, result_array[i]+1500)).ravel()
+            self.n_neigh = 3*result_array[0].shape[0]
         else:
             X = data.to_numpy(dtype=float)
             kdtree = KDTree(X.T)
@@ -49,10 +81,15 @@ class LAVASET:
 
         nodeCutVar = np.zeros(int(L))
         nodeCutValue = np.zeros(int(L))
-        RelatedCutVar={key: np.zeros(self.n_neigh) for key in range(L)}
-        CenteredCutVar={key: np.zeros(self.n_neigh) for key in range(L)}
-        VarianceCutVar={key: np.zeros(self.n_neigh) for key in range(L)}
-        LoadingsCutVar={key: np.zeros(self.n_neigh) for key in range(L)}
+        # RelatedCutVar={key: np.zeros(self.n_neigh) for key in range(L)}
+        # CenteredCutVar={key: np.zeros(self.n_neigh) for key in range(L)}
+        # VarianceCutVar={key: np.zeros(self.n_neigh) for key in range(L)}
+        # LoadingsCutVar={key: np.zeros(self.n_neigh) for key in range(L)}
+        RelatedCutVar={key: dict() for key in range(L)}
+        CenteredCutVar={key: dict() for key in range(L)}
+        VarianceCutVar={key: dict() for key in range(L)}
+        LoadingsCutVar={key: dict() for key in range(L)}
+        
         nodeflags = np.zeros(int(L+1))
         nodelabel = np.full(int(L), np.inf)
         nodelabel = np.zeros(int(L))
@@ -87,22 +124,25 @@ class LAVASET:
                     
                     # node_var = random_instance.permutation(range(0,m))[:nvartosample]
                     node_var = np.random.permutation(range(0,m))[:nvartosample]
-
-
                     giniii[node_var,0]+=1
 
                     if weights is not None:
                         Wcd = weights[currentDataIndx]
                     else:
                         Wcd = None
-                    NV = np.zeros((nvartosample, self.n_neigh), dtype=int)
-                    MC = np.zeros((nvartosample, self.n_neigh))
-                    VA = np.zeros((nvartosample, self.n_neigh))
-                    P = np.zeros((nvartosample, self.n_neigh))
+                    # NV = np.zeros((nvartosample, self.n_neigh), dtype=int)
+                    # MC = np.zeros((nvartosample, self.n_neigh))
+                    # VA = np.zeros((nvartosample, self.n_neigh))
+                    # P = np.zeros((nvartosample, self.n_neigh))
+                    # scores = np.zeros(currentDataIndx.shape[0])
+                    # X_pca = np.zeros((Data.shape[0], 1))  # initiating nested array with array number = # of samples
+                    
+                    NV = dict()
+                    MC = dict()
+                    VA = dict()
+                    P = dict()
                     scores = np.zeros(currentDataIndx.shape[0])
-                    X_pca = np.zeros((Data.shape[0], 1))  # initiating nested array with array number = # of samples
-                    loadings2 = dict()
-
+                    X_pca = np.zeros((Data.shape[0], 1)) 
                     for i, feat in enumerate(node_var):
                         NV[i] = knn[feat] # a dict of all the variables picked for s node (node_var) and their neighbors in the form of list (the first element of each list is the feature originally picked) 
                         matrix = Data[currentDataIndx][:, NV[i]]
@@ -240,14 +280,15 @@ class LAVASET:
 
         if self.nsamtosample is None:
             self.nsamtosample = Data.shape[0]
-        else:
+        elif self.nsamtosample > 1:
             self.nsamtosample = self.nsamtosample
+        else:
+            self.nsamtosample = int(Data.shape[0]*self.nsamtosample)
         
         if self.nvartosample is None:
             self.nvartosample = Data.shape[1]
         elif self.nvartosample == 'sqrt':
             self.nvartosample = int(np.sqrt(Data.shape[1]))
-
        
         Random_Forest = []
         Random_Forest = Parallel(n_jobs=-1, verbose=10)(delayed(self.build_tree)(i, random_state+i, Data, Labels, knn,

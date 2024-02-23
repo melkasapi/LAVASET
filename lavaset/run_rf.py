@@ -21,11 +21,12 @@ import csv
 #     y = np.where(y == 1, 0, 1).astype(np.double)
 # nn = knn_calculation(nmr_peaks.columns[3:], 1s0)
 
-mtbls1 = pd.read_csv('MTBLS1.csv')
-mtbls24 = pd.read_csv('MTBLS24.csv')
+# mtbls1 = pd.read_csv('MTBLS1.csv')
+# mtbls24 = pd.read_csv('MTBLS24.csv')
+vcg_data = pd.read_excel('~/Documents/lavaset_local/PTBDB_MI_VCG_data.xlsx')
 
-X = np.array(mtbls1.iloc[:, 1:])
-y = np.array(mtbls1.iloc[:, 0], dtype=np.double)
+X = np.array(vcg_data.iloc[:, 5:])
+y = np.array(vcg_data.iloc[:, 3], dtype=np.double) # acuteMyocardialInfarction
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=180)
 scaler = StandardScaler()
@@ -35,9 +36,9 @@ X_test = scaler.transform(X_test)
 st = time.time()
 
 results = []
-for i in range(0, 100, 5):
+for i in range(0, 100,5):
     print('random_state', i)
-    model = StochasticBosque(ntrees=1000, nvartosample='sqrt', nsamtosample=95, oobe=True) # 425taking 1/3 of samples for bootstrapping
+    model = StochasticBosque(ntrees=1000, nvartosample='sqrt', nsamtosample=int(X_train.shape[0]*0.9), oobe=True) # 425taking 1/3 of samples for bootstrapping
     rf = model.fit_sb(X_train, y_train, random_state=i)
     y_preds, votes, oobe = model.predict_sb(X_test, rf)
     accuracy = accuracy_score(y_test, np.array(y_preds, dtype=int))
@@ -47,13 +48,13 @@ for i in range(0, 100, 5):
 
     result = {'Random State': i, 'Accuracy': accuracy, 'Precision': precision, 'Recall': recall, 'F1 Score': f1, 'oobe': oobe}
     results.append(result)
-    # pd.DataFrame(model.feature_evaluation(X_train, rf)).to_csv(f'classicRF_feature_impo_mtbls1_nsamtosample95_1000t.csv')
+    # pd.DataFrame(model.feature_evaluation(X_train, rf)).to_csv(f'~/Documents/lavaset_local/vcg_results/classicRF_feature_impo_1000T_VCG_acutemi_rs{i}.csv')
 
 print(results)
 fields = ['Random State', 'Accuracy', 'Precision', 'Recall', 'F1 Score', 'oobe']
 en = time.time()
 print('time', en-st)
-with open(f'classicRF_metrics_impo_mtbls1_nsamtosample95_1000t', 'w', newline='') as file:
+with open(f'~/Documents/lavaset_local/vcg_results/classicRF_1000T_VCG_acutemi.txt', 'w', newline='') as file:
     writer = csv.DictWriter(file, fieldnames=fields)
     writer.writeheader()  # Write header
     writer.writerows(results)  # Write multiple rows
