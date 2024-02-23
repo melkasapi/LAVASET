@@ -1,4 +1,4 @@
-from lavaset import LAVASET
+from lavaset.lavaset import LAVASET
 import numpy as np
 import pandas as pd 
 from scipy.spatial import distance_matrix
@@ -10,7 +10,11 @@ import csv
 import sys
 import os
 from sklearn.model_selection import ParameterGrid
+import sys
+import os
 
+# Add the parent directory to sys.path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
 X = np.array(nmr_peaks.iloc[:, 3:])
