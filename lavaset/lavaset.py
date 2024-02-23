@@ -10,11 +10,7 @@ import pandas as pd
 import random
 from joblib import Parallel, delayed
 import csv
-<<<<<<< HEAD:lavaset/lavaset.py
 from sklearn.preprocessing import StandardScaler
-
-=======
->>>>>>> 5deac2fa58c7b0bce4b617c54a67a1c31d74449c:lavaset/lavaset_new.py
 
 class LAVASET: 
 
@@ -60,7 +56,7 @@ class LAVASET:
                     subarray = np.concatenate((original_array[lower_bound:], original_array[:upper_bound]))
                 result_array.append(subarray)
             result_array = np.array(result_array)
-            neighbors = np.zeros((m, 3*result_array[0].shape[0]), dtype=int) # creating neigbrs array for each of the points (all XYZ) and their neighbors
+            neighbors = np.zeros((m, 3*result_array[0].shape[0]), dtype=int) # creating neigbors array for each of the points (all XYZ) and their neighbors
             for i in range(result_array.shape[0]):
                 neighbors[i] = np.array((result_array[i], result_array[i]+750, result_array[i]+1500)).ravel() 
                 neighbors[i+750] = np.array((result_array[i], result_array[i]+750, result_array[i]+1500)).ravel() # adding 750 to each of the points to get the YZ points too
@@ -121,7 +117,6 @@ class LAVASET:
                 if len(currentDataIndx) >= minparent:
                     random_instance = np.random.RandomState(random_state)
                     # node_var = random_instance.randint(0, m, nvartosample)
-                    
                     # node_var = random_instance.permutation(range(0,m))[:nvartosample]
                     node_var = np.random.permutation(range(0,m))[:nvartosample]
                     giniii[node_var,0]+=1
@@ -136,13 +131,11 @@ class LAVASET:
                     # P = np.zeros((nvartosample, self.n_neigh))
                     # scores = np.zeros(currentDataIndx.shape[0])
                     # X_pca = np.zeros((Data.shape[0], 1))  # initiating nested array with array number = # of samples
-                    
                     NV = dict()
                     MC = dict()
                     VA = dict()
                     P = dict()
                     scores = np.zeros(currentDataIndx.shape[0])
-                    X_pca = np.zeros((Data.shape[0], 1)) 
                     for i, feat in enumerate(node_var):
                         NV[i] = knn[feat] # a dict of all the variables picked for s node (node_var) and their neighbors in the form of list (the first element of each list is the feature originally picked) 
                         matrix = Data[currentDataIndx][:, NV[i]]

@@ -11,28 +11,6 @@ import csv
 from joblib import Parallel, delayed
 
 
-
-# st = time.time()
-# nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
-# X = np.array(nmr_peaks.iloc[:, 3:])
-# y = np.array(nmr_peaks.iloc[:, 1], dtype=int)
-# # y = pd.read_csv('~/Documents/cmr_rf/LAVASET/lavaset-cpp/formate-testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
-# # y = pd.read_excel('ethanol-uracil-testing/simulated_groups.xlsx').iloc[:, 1]
-# if np.unique(y).any() != 0:
-#     y = np.where(y == 1, 0, 1).astype(np.double)
-
-# # y = np.array(nmr_peaks.iloc[:, 1], dtype=int)
-# # # y = pd.read_csv('~/Documents/cmr_rf/LAVASET/testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=int)
-
-# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=180)
-
-
-# scaler = StandardScaler()
-# X_train = scaler.fit_transform(X_train)
-# X_test = scaler.transform(X_test)
-# print(X_train.shape)
-
-
 class StochasticBosque:   
     def __init__(self, minparent=2, minleaf=1, nvartosample=None, ntrees=100, nsamtosample=None, method='g', oobe=False, weights=None):
         self.minparent = minparent
