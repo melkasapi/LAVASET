@@ -1,4 +1,6 @@
-from best_cut_node import best_cut_node
+# import lavaset.best_cut_node as best_cut_node
+import best_cut_node as best_cut_node
+
 import numpy as np
 from sklearn import datasets
 from sklearn.neighbors import KDTree, NearestNeighbors
@@ -7,9 +9,7 @@ import pandas as pd
 from numpy.linalg import svd
 from sklearn.preprocessing import StandardScaler, normalize
 import pandas as pd
-import random
 from joblib import Parallel, delayed
-import csv
 from sklearn.preprocessing import StandardScaler
 
 class LAVASET: 

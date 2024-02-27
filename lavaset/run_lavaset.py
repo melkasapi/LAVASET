@@ -1,4 +1,5 @@
-from lavaset.lavaset import LAVASET
+# from lavaset.lavaset import LAVASET
+from lavaset import LAVASET
 import numpy as np
 import pandas as pd 
 from scipy.spatial import distance_matrix

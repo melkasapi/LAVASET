@@ -1,9 +1,7 @@
 
 import numpy as np
 from cython_wrapper import gbc_p
-from sklearn import datasets
 import pandas as pd
-import time
 # from _GBCP_python import GBCP
 
 
