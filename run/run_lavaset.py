@@ -13,10 +13,13 @@ from sklearn.model_selection import ParameterGrid
 
 
 nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
-X = np.array(nmr_peaks.iloc[:, 3:])cd 
+X = np.array(nmr_peaks.iloc[:, 3:])
 # y = np.array(nmr_peaks.iloc[:, 1], dtype=np.double)
 
-# mtbls1 = pd.read_csv('~/Documents/lavaset_local/mtbls_results/MTBLS1.csv')
+mtbls1 = pd.read_csv('~/Documents/lavaset_local/mtbls_results/MTBLS1.csv')
+X = np.array(mtbls1.iloc[:, 1:])
+y = np.array(mtbls1.iloc[:, 0], dtype=np.double)
+
 # mtbls24 = pd.read_csv('~/Documents/lavaset_local/mtbls_results/MTBLS24.csv')
 
 # vcg_data = pd.read_excel('~/Documents/lavaset_local/PTBDB_MI_VCG_data.xlsx')
@@ -27,7 +30,7 @@ X = np.array(nmr_peaks.iloc[:, 3:])cd
 # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=180)
 
 # # y = pd.read_csv('~/Documents/cmr_rf/LAVASET/lavaset-cpp/formate-testing/formate_cluster_labels.txt', header=None).iloc[:, 0].to_numpy(dtype=np.double)
-y = pd.read_excel('~/Documents/lavaset_local/ethanol-uracil-testing/simulated_groups.xlsx').iloc[:, 1]
+# y = pd.read_excel('~/Documents/lavaset_local/ethanol-uracil-testing/simulated_groups.xlsx').iloc[:, 1]
 if np.unique(y).any() != 0:
     y = np.where(y == 1, 0, 1).astype(np.double)
 # param_grid = {    
@@ -44,10 +47,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 # dist = distance_matrix(nmr_peaks.iloc[:10, 3:10], nmr_peaks.iloc[:10, 3:10])
 results=[]
 for i in range(0,1, 1):
-    model = LAVASET(ntrees=100, n_neigh=10, distance=False, nvartosample='sqrt', nsamtosample=180, oobe=True) # 425taking 1/3 of samples for bootstrapping
+    model = LAVASET(ntrees=100, n_neigh=10, distance=False, nvartosample='sqrt', nsamtosample=0.5, oobe=True) # 425taking 1/3 of samples for bootstrapping
     # knn = model.knn_calculation(dist) ### this is the input for the knn calcualtion 
-    knn = model.knn_calculation(nmr_peaks.columns[3:], data_type='1D') ### this is the input for the knn calculation 
-    print(knn)
+    knn = model.knn_calculation(mtbls1.columns[1:], data_type='1D') ### this is the input for the knn calculation 
     lavaset = model.fit_lavaset(X_train, y_train, knn, random_state=5)
     y_preds, votes, oobe = model.predict_lavaset(X_test, lavaset)
     accuracy = accuracy_score(y_test, np.array(y_preds, dtype=int))

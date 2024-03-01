@@ -1,13 +1,19 @@
+try:
+    from Cython.Build import cythonize
+except ImportError as e:
+    raise ImportError(f"{e}. Please install Cython and NumPy before installing this package.") from e
+
 from setuptools import setup, find_packages, Extension
-from Cython.Build import cythonize
 from pathlib import Path
-import numpy as np
 
 # Define the directory containing this script
 this_directory = Path(__file__).parent
 # Read the contents of your README file
 long_description = (this_directory / "README.md").read_text()
 
+def numpy_include():
+    import numpy
+    return numpy.get_include()
 # Define the extension module
 ext = Extension(
     name="lavaset.cython_wrapper",  # Extension name
@@ -28,13 +34,13 @@ setup(
     url="https://github.com/melkasapi/LAVASET",
     packages=['lavaset'],
     ext_modules=cythonize([ext], language_level=3),
-    include_dirs=[np.get_include()],  # Include the NumPy headers
+    include_dirs=[numpy_include()],  # Include the NumPy headers
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.10',
+    python_requires='>=3.7',
     install_requires=[
         'pandas',
         'scikit-learn',
@@ -44,4 +50,5 @@ setup(
         'cython',
         'joblib',
     ],
+    # setup_requires=['numpy', 'cython']
 )
