@@ -27,11 +27,11 @@ pip install lavaset
 
 Cython and NumPy are incorporated as build dependencies for LAVASET and are pre-installed before the package setup. If you encounter any issues during installation, especially regarding Cython or NumPy, consider installing these packages manually before proceeding with the LAVASET installation.
 
-# For macOS or Windows users
+## For macOS or Windows users
 
 LAVASET is built on a Linux architecture that is compatible with various linux platforms via a Docker image, however if you want to install directly to a MacOS or Windows environment using the conda would be the easiest way to do it.
 
-## Step 1: Create a Conda environment
+### Step 1: Create a Conda environment
 
 First, create and activate the conda environment where you'll install the Linux-built packages.
 
@@ -39,16 +39,39 @@ First, create and activate the conda environment where you'll install the Linux-
 conda create -n lavaset-env python=3.x
 conda activate lavaset-env
 ```
-## Step 2: Add the Conda-forge channel
+### Step 2: Add the Conda-forge channel
 Add the Conda-forge channel, which provides many pre-built packages for various platforms.
 
 ```bash 
 conda config --add channels conda-forge
 ```
-## Step 3: Install linux-built LAVASET
+### Step 3: Install linux-built LAVASET
 
 ```bash 
 conda install LAVASET=0.1.0=linux-64
+```
+## Example Usage
+
+A jupyter notebook with examples on how to import and use the LAVASET package can be found [here]. Briefly, the LAVASET model can be called as below
+
+```bash
+model = LAVASET(ntrees=100, n_neigh=10, distance=False, nvartosample='sqrt', nsamtosample=0.5, oobe=True) 
+```
+
+- ntrees: number of trees (or estimators) for the ensemble (int)
+- n_neigh: number of neighbors to take for the calculation of the latent variable; this excludes the feature that has been selected for split, therefore the latent variable is calculated by the total of n+1 features (int)
+- distance: parameter indicating whether the input for neighbor calculation is a distance matrix, default is False; if True, then n_neigh should be 0 (boolean)
+- nvartosample: the number of features picked for each split, 'sqrt' indicates the squared root of total number of features, if int then takes that specific number of features (string or int)
+- nsamtosample: the number of sample to consider for each tree, if float (like 0.5) then it considers `float * total number of samples`, if int then takes that specific number of samples (float or int)
+- oobe: parameter for calcualting the out-of-bag score, default=True (boolean)
+
+
+```bash 
+knn = model.knn_calculation(dist) ### this is the input for the knn calcualtion 
+```
+
+```bash 
+knn = model.knn_calculation(mtbls1.columns[1:], data_type='1D') ### this is the input for the knn calculation 
 ```
 
 ## Contributing
