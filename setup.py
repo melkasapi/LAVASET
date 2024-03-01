@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages, Extension
 from Cython.Build import cythonize
-import numpy as np
 from pathlib import Path
+import numpy as np
 
 # Define the directory containing this script
 this_directory = Path(__file__).parent
@@ -34,15 +34,13 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.10',
     install_requires=[
         'pandas',
         'scikit-learn',
         'numpy',
         'setuptools',
         'scipy',
-        'statsmodels',
-        'lavaset',
         'cython',
         'joblib',
     ],

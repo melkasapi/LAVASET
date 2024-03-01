@@ -3,7 +3,5 @@ scikit-learn
 numpy
 setuptools
 scipy
-statsmodels
-lavaset
 cython
 joblib

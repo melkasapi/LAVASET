@@ -1,7 +1,6 @@
-# from lavaset.lavaset import LAVASET
-from lavaset import LAVASET
+from lavaset.lavaset import LAVASET
 import numpy as np
-import pandas as pd 
+import pandas as pd
 from scipy.spatial import distance_matrix
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.preprocessing import StandardScaler
@@ -11,14 +10,10 @@ import csv
 import sys
 import os
 from sklearn.model_selection import ParameterGrid
-import sys
-import os
 
-# Add the parent directory to sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 nmr_peaks = pd.read_csv('~/Documents/IBS/NMR_data/IBS_HNMR_data_n267.csv')
-X = np.array(nmr_peaks.iloc[:, 3:])
+X = np.array(nmr_peaks.iloc[:, 3:])cd 
 # y = np.array(nmr_peaks.iloc[:, 1], dtype=np.double)
 
 # mtbls1 = pd.read_csv('~/Documents/lavaset_local/mtbls_results/MTBLS1.csv')
@@ -71,3 +66,4 @@ for i in range(0,1, 1):
     #         writer.writeheader()  # Write header
     #     writer.writerow(result)
 print(results)
+

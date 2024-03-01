@@ -167,7 +167,7 @@ class LAVASET:
                         # MC[i] = np.ravel(scaler.mean_)
                         # VA[i] = np.ravel(scaler.var_)
                     scores = scores[1:, :].T
-                    bestCutVar, bestCutValue = best_cut_node(method, scores, Labels[currentDataIndx], minleaf, max_label)
+                    bestCutVar, bestCutValue = best_cut_node.best_cut_node(method, scores, Labels[currentDataIndx], minleaf, max_label)
                     bestCutVar = int(bestCutVar)
                     random_state+=1
                     #bestCutVar here is the index from the node_var variables 
