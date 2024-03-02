@@ -65,10 +65,17 @@ model = LAVASET(ntrees=100, n_neigh=10, distance=False, nvartosample='sqrt', nsa
 - nsamtosample: the number of sample to consider for each tree, if float (like 0.5) then it considers `float * total number of samples`, if int then takes that specific number of samples (float or int)
 - oobe: parameter for calcualting the out-of-bag score, default=True (boolean)
 
+If the input to the `knn_calculation` function is a distance matrix then:
+```bash
+model = LAVASET(ntrees=100, n_neigh=0, distance=True, nvartosample='sqrt', nsamtosample=0.5, oobe=True) 
 
-```bash 
-knn = model.knn_calculation(dist) ### this is the input for the knn calcualtion 
+knn = model.knn_calculation(distance_matrix, data_type='distance_matrix')
 ```
+If the neighbors need to be calculated from the 1D spectrum ppm values of an HNMR dataset, then the input is the 1D array with the ppm values. Here the model parameters should be set as `distance=False` and `n_neigh=k`. The `data_type` parameter for the `knn_calculation` in this case will be set to `1D`. All options include:
+- 'distance_matrix' is used for distance matrix input, 
+- '1D' is used for 1D data like signals or spectra, 
+- 'VCG' is used for VCG data, 
+- 'other' is used for any other type of data, where it calculates the nearest neighbors based on the 2D data input. 
 
 ```bash 
 knn = model.knn_calculation(mtbls1.columns[1:], data_type='1D') ### this is the input for the knn calculation 
