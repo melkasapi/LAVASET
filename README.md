@@ -94,7 +94,8 @@ knn = model.knn_calculation(mtbls1.columns[1:], data_type='1D') ### this is the 
     doi = {10.1093/bioinformatics/btae101},
     url = {https://doi.org/10.1093/bioinformatics/btae101},
     eprint = {https://academic.oup.com/bioinformatics/advance-article-pdf/doi/10.1093/bioinformatics/btae101/56732749/btae101.pdf},
-}```
+}
+```
 
 ## Contributing
 
