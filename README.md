@@ -94,7 +94,7 @@ Please submit any changes via a pull request. These will be reviewed by the LAVA
 
 ## License
 
-LAVASET is released under the MIT License. See the LICENSE file for more details.
+LAVASET is released under the GNU License. See the LICENSE file for more details.
 
 ## Contact
 
