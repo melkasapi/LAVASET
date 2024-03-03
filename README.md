@@ -81,6 +81,21 @@ If the neighbors need to be calculated from the 1D spectrum ppm values of an HNM
 knn = model.knn_calculation(mtbls1.columns[1:], data_type='1D') ### this is the input for the knn calculation 
 ```
 
+## Citing us
+```bash 
+@article{10.1093/bioinformatics/btae101,
+    author = {Kasapi, Melpomeni and Xu, Kexin and Ebbels, Timothy M D and O’Regan, Declan P and Ware, James S and Posma, Joram M},
+    title = "{LAVASET: Latent variable stochastic ensemble of trees. An ensemble method for correlated datasets with spatial, spectral, and temporal dependencies}",
+    journal = {Bioinformatics},
+    pages = {btae101},
+    year = {2024},
+    month = {02},
+    issn = {1367-4811},
+    doi = {10.1093/bioinformatics/btae101},
+    url = {https://doi.org/10.1093/bioinformatics/btae101},
+    eprint = {https://academic.oup.com/bioinformatics/advance-article-pdf/doi/10.1093/bioinformatics/btae101/56732749/btae101.pdf},
+}```
+
 ## Contributing
 
 Contributions to LAVASET are always welcome.
