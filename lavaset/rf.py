@@ -1,13 +1,6 @@
-from best_cut_node import best_cut_node
+from lavaset.best_cut_node import best_cut_node
 import numpy as np
-from sklearn import datasets
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 import pandas as pd
-import random
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-import time
-import csv
 from joblib import Parallel, delayed
 
 
@@ -78,7 +71,7 @@ class StochasticBosque:
                         Wcd = weights[currentDataIndx]
                     else:
                         Wcd = None
-                    bestCutVar, bestCutValue = best_cut_node(method, Data[currentDataIndx][:, node_var], Labels[currentDataIndx], minleaf, max_label)
+                    bestCutVar, bestCutValue = best_cut_node.best_cut_node(method, Data[currentDataIndx][:, node_var], Labels[currentDataIndx], minleaf, max_label)
                     random_state+=1
                     if bestCutVar != -1:
 

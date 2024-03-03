@@ -1,4 +1,4 @@
-from best_cut_node import best_cut_node
+import lavaset.best_cut_node as best_cut_node
 import numpy as np
 from sklearn import datasets
 from sklearn.neighbors import KDTree, NearestNeighbors
@@ -7,9 +7,7 @@ import pandas as pd
 from numpy.linalg import svd
 from sklearn.preprocessing import StandardScaler, normalize
 import pandas as pd
-import random
 from joblib import Parallel, delayed
-import csv
 from sklearn.preprocessing import StandardScaler
 
 class LAVASET: 
@@ -169,7 +167,7 @@ class LAVASET:
                         # MC[i] = np.ravel(scaler.mean_)
                         # VA[i] = np.ravel(scaler.var_)
                     scores = scores[1:, :].T
-                    bestCutVar, bestCutValue = best_cut_node(method, scores, Labels[currentDataIndx], minleaf, max_label)
+                    bestCutVar, bestCutValue = best_cut_node.best_cut_node(method, scores, Labels[currentDataIndx], minleaf, max_label)
                     bestCutVar = int(bestCutVar)
                     random_state+=1
                     #bestCutVar here is the index from the node_var variables 
