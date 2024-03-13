@@ -3,6 +3,8 @@
 [![PyPI version](https://badge.fury.io/py/lavaset.svg)](https://badge.fury.io/py/lavaset)
 [![Downloads](https://static.pepy.tech/badge/lavaset)](https://pepy.tech/project/lavaset) 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![DOI:10.1101/2023.10.20.563223](http://img.shields.io/badge/DOI-10.1101/2023.10.20.563223-BE2536.svg)](https://doi.org/10.1101/2023.10.20.563223)
+[![DOI:10.1093/bioinformatics/btae101](http://img.shields.io/badge/DOI-10.1093/bioinformatics/btae101-0887BA.svg)](https://doi.org/10.1093/bioinformatics/btae101)
 
 LAVASET (**La**tent **Va**riable **S**tochastic **E**nsemble of **T**rees) is a Python package designed for ensemble learning in datasets with complex spatial, spectral, and temporal dependencies. The main method is described in our Bioinformatics paper: https://doi.org/10.1093/bioinformatics/btae101. 
 
