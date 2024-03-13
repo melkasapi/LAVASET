@@ -1,5 +1,9 @@
 # LAVASET
 
+[![PyPI version](https://badge.fury.io/py/lavaset.svg)](https://badge.fury.io/py/lavaset)
+[![Downloads](https://static.pepy.tech/badge/lavaset)](https://pepy.tech/project/lavaset) 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 LAVASET (Latent Variable Stochastic Ensemble of Trees) is a Python package designed for ensemble learning in datasets with complex spatial, spectral, and temporal dependencies. The main method is described in our Oxford Bioinformatics paper: https://doi.org/10.1093/bioinformatics/btae101. 
 
 ## Features
