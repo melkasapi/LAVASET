@@ -56,7 +56,7 @@ conda install LAVASET=0.1.0=linux-64
 ```
 ## Example Usage
 
-A jupyter notebook with examples on how to import and use the LAVASET package can be found [here]. Briefly, the LAVASET model can be called as below
+A jupyter notebook with examples on how to import and use the LAVASET package can be found [here](https://github.com/melkasapi/LAVASET/blob/main/examples/run_lavaset.ipynb). Briefly, the LAVASET model can be called as below:
 
 ```bash
 model = LAVASET(ntrees=100, n_neigh=10, distance=False, nvartosample='sqrt', nsamtosample=0.5, oobe=True) 
@@ -82,7 +82,7 @@ If the neighbors need to be calculated from the 1D spectrum ppm values of an HNM
 - 'other' is used for any other type of data, where it calculates the nearest neighbors based on the 2D data input. 
 
 ```bash 
-knn = model.knn_calculation(mtbls1.columns[1:], data_type='1D') ### this is the input for the knn calculation 
+knn = model.knn_calculation(mtbls1.columns[1:], data_type='1D')
 ```
 
 ## Citing us

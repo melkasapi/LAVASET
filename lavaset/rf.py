@@ -1,4 +1,4 @@
-from lavaset.best_cut_node import best_cut_node
+import lavaset.best_cut_node as best_cut_node
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
@@ -164,7 +164,7 @@ class StochasticBosque:
         return Random_ForestT_dict
     
     def fit_sb(self, Data, Labels, random_state):
-
+        print('here')
         if self.nsamtosample is None:
             self.nsamtosample = Data.shape[0]
         else:
