@@ -1,7 +1,8 @@
 # LAVASET
 
 [![PyPI version](https://badge.fury.io/py/lavaset.svg)](https://badge.fury.io/py/lavaset)
-[![Downloads](https://static.pepy.tech/badge/lavaset)](https://pepy.tech/project/lavaset) 
+[![Downloads](https://static.pepy.tech/badge/lavaset)](https://pepy.tech/project/lavaset)
+[![DOI](https://zenodo.org/badge/566889202.svg)](https://zenodo.org/doi/10.5281/zenodo.10816838)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![DOI:10.1101/2023.10.20.563223](http://img.shields.io/badge/DOI-10.1101/2023.10.20.563223-BE2536.svg)](https://doi.org/10.1101/2023.10.20.563223)
 [![DOI:10.1093/bioinformatics/btae101](http://img.shields.io/badge/DOI-10.1093/bioinformatics/btae101-0887BA.svg)](https://doi.org/10.1093/bioinformatics/btae101)
