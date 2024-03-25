@@ -13,7 +13,7 @@ jobs:
 
     # Assuming artifacts are in the 'dist/' directory; adjust if your path is different
     - name: Upload Distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@v1.4.2
+      uses: pypa/gh-action-pypi-publish@v1.4.2 --verbose
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
