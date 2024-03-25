@@ -1,9 +1,8 @@
 name: LAVASET Deployon PyPI and Release
 
-on:
-  push:
-    tags:
-      - 'main'  # Trigger on any tag push
+on: ['push']
+  branches:
+    - main  # Adjust this to your release branch if different
 
 jobs:
   deploy-and-release:
