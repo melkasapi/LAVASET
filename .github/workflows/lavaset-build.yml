@@ -51,28 +51,101 @@
 
 #### below is code for the lavaset-build workflow on windows platforms
 #### cannot do windows and macOS at the same time
+# name: lavaset-build
+
+# on: [push, pull_request]
+
+# jobs:
+#   build_wheels:
+#     name: Build wheels on Windows and macOS for Python ${{ matrix.python-version }}
+#     runs-on: [windows-latest]
+#     strategy:
+#       matrix:
+#         python-version: ['3.10']
+
+#     steps:
+#     - uses: actions/checkout@v2
+#     - name: Set up Python
+#       uses: actions/setup-python@v2
+#       with:
+#         python-version: ${{ matrix.python-version }}
+#     - name: Install cibuildwheel
+#       run: python -m pip install cibuildwheel
+#     - name: Build wheels
+#       run: python -m cibuildwheel --output-dir wheelhouse
+#     - uses: actions/upload-artifact@v2
+#       with:
+#         path: ./wheelhouse/*.whl
+
+
+# name: lavaset-build
+
+# on: [push, pull_request]
+
+# jobs:
+#   build_wheels:
+#     name: Build wheels on Windows for CPython ${{ matrix.python-version }}
+#     runs-on: windows-latest
+#     strategy:
+#       matrix:
+#         python-version: ['3.10']
+
+#     steps:
+#     - uses: actions/checkout@v2
+
+#     - name: Set up Python
+#       uses: actions/setup-python@v2
+#       with:
+#         python-version: ${{ matrix.python-version }}
+
+    # - name: Install cibuildwheel
+    #   run: python -m pip install cibuildwheel
+
+    # - name: Build wheels with cibuildwheel
+    #   run: python -m cibuildwheel --output-dir wheelhouse
+    #   env:
+    #     CIBW_BUILD: cp${{ matrix.python-version }}-*
+    #     CIBW_BEFORE_BUILD: pip install numpy
+    #     # If you have multiple dependencies, consider using a requirements.txt
+
+    # - uses: actions/upload-artifact@v2
+    #   with:
+    #     name: wheels-windows-python${{ matrix.python-version }}
+    #     path: ./wheelhouse/*.whl
+
 name: lavaset-build
 
 on: [push, pull_request]
 
 jobs:
   build_wheels:
-    name: Build wheels on Windows and macOS for Python ${{ matrix.python-version }}
-    runs-on: [macos-latest]
+    name: Build wheels on Windows for PyPy ${{ matrix.python-version }}
+    runs-on: windows-latest
     strategy:
       matrix:
-        python-version: ['3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10'] # Example PyPy versions; adjust based on your needs
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+        # Note: setup-python may not directly support all PyPy versions; you might need a manual setup or Docker for specific versions
+
     - name: Install cibuildwheel
       run: python -m pip install cibuildwheel
-    - name: Build wheels
+
+    - name: Build wheels with cibuildwheel
       run: python -m cibuildwheel --output-dir wheelhouse
+      env:
+        CIBW_BUILD: pp${{ matrix.python-version }}-*
+        CIBW_BEFORE_BUILD: pip install numpy
+        # Adjust the CIBW_BUILD pattern to match PyPy versions if necessary
+
     - uses: actions/upload-artifact@v2
       with:
+        name: wheels-windows-pypy${{ matrix.python-version }}
         path: ./wheelhouse/*.whl
+
