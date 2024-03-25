@@ -1,0 +1,44 @@
+name: LAVASET Deployon PyPI and Release
+
+on:
+  push:
+    tags:
+      - 'main'  # Trigger on any tag push
+
+jobs:
+  deploy-and-release:
+    runs-on: ubuntu-latest  # This job doesn't build, so it doesn't need to run on multiple OSes
+    steps:
+    - uses: actions/checkout@v2
+
+    # Assuming artifacts are in the 'dist/' directory; adjust if your path is different
+    - name: Upload Distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@v1.4.2
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
+        packages_dir: wheelhouse
+
+    # # Create GitHub Release
+    # - name: Create GitHub Release
+    #   id: create_release
+    #   uses: actions/create-release@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     tag_name: ${{ github.ref }}
+    #     release_name: Release ${{ github.ref_name }}
+    #     draft: false
+    #     prerelease: false
+
+    # # Upload a single asset to the GitHub Release
+    # # Repeat this step as necessary for multiple artifacts
+    # - name: Upload Release Asset
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: ./wheelhouse/your-package.whl
+    #     asset_name: your-package.whl
+        # asset_content_type: application/octet-stream
