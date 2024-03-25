@@ -36,8 +36,24 @@ Cython and NumPy are incorporated as build dependencies for LAVASET and are pre-
 
 ## For macOS or Windows users
 
-LAVASET is built on a Linux architecture that is compatible with various linux platforms via a Docker image, however if you want to install directly to a MacOS or Windows environment using the conda would be the easiest way to do it.
+LAVASET is built on a Linux architecture that is compatible with various linux platforms via a Docker image, and it has builds for the following macOS and Windows platforms via ``cibuildwheel``: 
 
+```
+[macos]
+python_configurations = [
+  { identifier = "cp3x-macosx_x86_64", version = "3.7-3.12"},
+  { identifier = "cp3x-macosx_arm64", version = "3.7-3.12"},
+  { identifier = "cp3x-macosx_universal2", version = "3.7-3.12"}]
+
+[windows]
+python_configurations = [
+  { identifier = "cp3x-win32", version = "3.7-3.12", arch = "32" },
+  { identifier = "cp3x-win_amd64", version = "3.7-3.12", arch = "64" },
+  { identifier = "cp3x-win_arm64", version = "3.9-3.12", arch = "ARM64" }]
+```
+
+<!-- however if you want to install directly to a MacOS or Windows environment using the conda would be the easiest way to do it. -->
+<!-- 
 ### Step 1: Create a Conda environment
 
 First, create and activate the conda environment where you'll install the Linux-built packages.
@@ -56,7 +72,7 @@ conda config --add channels conda-forge
 
 ```bash 
 conda install LAVASET=0.1.0=linux-64
-```
+``` -->
 ## Example Usage
 
 A jupyter notebook with examples on how to import and use the LAVASET package can be found [here](https://github.com/melkasapi/LAVASET/blob/main/examples/run_lavaset.ipynb). Briefly, the LAVASET model can be called as below:
