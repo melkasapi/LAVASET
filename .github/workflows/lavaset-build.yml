@@ -49,7 +49,8 @@
 #           asset_name: LAVASET-${{ matrix.python-version }}.whl
 #           asset_content_type: application/octet-stream
 
-#### below is code for the lavaset-build workflow on multiple linux platforms
+#### below is code for the lavaset-build workflow on windows platforms
+#### cannot do windows and macOS at the same time
 name: lavaset-build
 
 on: [push, pull_request]
@@ -57,7 +58,7 @@ on: [push, pull_request]
 jobs:
   build_wheels:
     name: Build wheels on Windows and macOS for Python ${{ matrix.python-version }}
-    runs-on: [windows-latest, macOS-latest]
+    runs-on: [windows-latest]
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9, 3.10, 3.11, 3.12]
