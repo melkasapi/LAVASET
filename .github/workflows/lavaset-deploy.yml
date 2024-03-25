@@ -1,8 +1,9 @@
 name: LAVASET Deployon PyPI and Release
 
-on: ['push']
-  branches:
-    - main  # Adjust this to your release branch if different
+on:
+  push:
+    branches:
+      - main # Adjust this to your release branch if different
 
 jobs:
   deploy-and-release:
