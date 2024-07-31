@@ -8,12 +8,14 @@
 [![DOI:10.1093/bioinformatics/btae101](http://img.shields.io/badge/DOI-10.1093/bioinformatics/btae101-0887BA.svg)](https://doi.org/10.1093/bioinformatics/btae101)
 
 LAVASET (**La**tent **Va**riable **S**tochastic **E**nsemble of **T**rees) is a Python package designed for ensemble learning in datasets with complex spatial, spectral, and temporal dependencies. The main method is described in our Bioinformatics paper: https://doi.org/10.1093/bioinformatics/btae101. 
+_An updated version (v1.0.0) with a LAVASET extension using boosted decision trees (LAVABOOST) and a new feature importance metric is scheduled for release on 4 August 2024._
 
 ## Features
 
 - **Efficient Handling of Correlated Data**: Optimized for datasets where traditional models struggle.
 - **Cython-Powered Performance**: Critical computations are implemented in Cython for efficiency.
 - **Cross-Platform Compatibility**: Tested and deployable across Linux, macOS, and Windows.
+<!-- Comment: - **Integrated directional feature importance metric (v1.0.0)**: class-based and suitable for multi-class classification -->
 
 ## Installation
 
