@@ -25,7 +25,7 @@ ext = Extension(
 # Configuration for the package
 setup(
     name="LAVASET",
-    version="0.1.0",
+    version="1.0.0",
     author="Melpomeni Kasapi",
     author_email="mk218@ic.ac.uk",
     description="LAVASET: Latent Variable Stochastic Ensemble of Trees. An ensemble method for correlated datasets with spatial, spectral, and temporal dependencies",
@@ -40,7 +40,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.7',
+    python_requires='>=3.9',
     install_requires=[
         'pandas',
         'scikit-learn',

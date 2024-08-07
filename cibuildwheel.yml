@@ -1,7 +1,21 @@
 build:
-  image: manylinux
+#   image: manylinux
 
 platforms:
+  - name: linux
+    image: quay.io/pypa/manylinux2014_x86_64
+    environment:
+      # No special environment variables needed for manylinux
+    before_build:
+      - python -m pip install -U pip setuptools wheel
+    builds:
+      - python_version: 3.7
+      - python_version: 3.8
+      - python_version: 3.9
+      - python_version: 3.10
+      - python_version: 3.11
+      - python_version: 3.12
+    
   - name: windows
     image: lambci/lambda:build-python3.x
     environment:
