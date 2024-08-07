@@ -7,13 +7,15 @@
 [![DOI:10.1101/2023.10.20.563223](http://img.shields.io/badge/DOI-10.1101/2023.10.20.563223-BE2536.svg)](https://doi.org/10.1101/2023.10.20.563223)
 [![DOI:10.1093/bioinformatics/btae101](http://img.shields.io/badge/DOI-10.1093/bioinformatics/btae101-0887BA.svg)](https://doi.org/10.1093/bioinformatics/btae101)
 
-LAVASET (**La**tent **Va**riable **S**tochastic **E**nsemble of **T**rees) is a Python package designed for ensemble learning in datasets with complex spatial, spectral, and temporal dependencies. The main method is described in our Bioinformatics paper: https://doi.org/10.1093/bioinformatics/btae101. 
+LAVASET (**La**tent **Va**riable **S**tochastic **E**nsemble of **T**rees) is a Python package designed for ensemble learning in datasets with complex spatial, spectral, and temporal dependencies. The main method is described in our Bioinformatics paper: https://doi.org/10.1093/bioinformatics/btae101. An updated version of LAVASET, v1, includes CLIFI, a class-based directional feature importance as well as boosting algorithms described in our preprint: https://www.biorxiv.org/content/10.1101/2024.08.01.605982v1.full.pdf. 
 
 ## Features
 
 - **Efficient Handling of Correlated Data**: Optimized for datasets where traditional models struggle.
 - **Cython-Powered Performance**: Critical computations are implemented in Cython for efficiency.
 - **Cross-Platform Compatibility**: Tested and deployable across Linux, macOS, and Windows.
+- **Integrated directional feature importance metric (v1.0.0)**: class-based and suitable for multi-class classification.
+
 
 ## Installation
 
@@ -103,6 +105,7 @@ If the neighbors need to be calculated from the 1D spectrum ppm values of an HNM
 ```bash 
 knn = model.knn_calculation(mtbls1.columns[1:], data_type='1D')
 ```
+Depending on whether you wish to use our new feature importance method (CLIFI) or the traditional RF method you can call different functions for your feature importance calculations that can be found in detail in the example notebooks. 
 
 ## Citing us
 ```bash 
