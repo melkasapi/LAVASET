@@ -1,35 +1,35 @@
-# # build:
-# #   image: manylinux
+build:
+  image: manylinux
 
-# platforms:
-#   - name: windows
-#     image: lambci/lambda:build-python3.x
-#     environment:
-#       WINE_CACHE: /wine
-#       WINEARCH: win64
-#     before_build:
-#       - apt-get update && apt-get install -y wine
-#     before_test:
-#       - python -m pip install -U pip setuptools wheel
-#     builds:
-#       - python_version: 3.7
-#       - python_version: 3.8
-#       - python_version: 3.9
-#       - python_version: 3.10
-#       - python_version: 3.11
-#       - python_version: 3.12
+platforms:
+  - name: windows
+    image: lambci/lambda:build-python3.x
+    environment:
+      WINE_CACHE: /wine
+      WINEARCH: win64
+    before_build:
+      - apt-get update && apt-get install -y wine
+    before_test:
+      - python -m pip install -U pip setuptools wheel
+    builds:
+      - python_version: 3.7
+      - python_version: 3.8
+      - python_version: 3.9
+      - python_version: 3.10
+      - python_version: 3.11
+      - python_version: 3.12
 
 
-# - name: macos
-#     image: "apple/sdks:latest"
-#     environment:
-#       MACOSX_DEPLOYMENT_TARGET: 10.9
-#     before_build:
-#       - python -m pip install -U pip setuptools wheel
-#     builds:
-#       - python_version: 3.7
-#       - python_version: 3.8
-#       - python_version: 3.9
-#       - python_version: 3.10
-#       - python_version: 3.11
-#       - python_version: 3.12
+  - name: macos
+    image: "apple/sdks:latest"
+    environment:
+      MACOSX_DEPLOYMENT_TARGET: 10.9
+    before_build:
+      - python -m pip install -U pip setuptools wheel
+    builds:
+      - python_version: 3.7
+      - python_version: 3.8
+      - python_version: 3.9
+      - python_version: 3.10
+      - python_version: 3.11
+      - python_version: 3.12
