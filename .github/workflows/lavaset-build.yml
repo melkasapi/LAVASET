@@ -7,7 +7,7 @@ on:
 jobs:
   release:
     name: Release on Python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
+    runs-on: [ubuntu-latest, windows-latest, macos-latest]
 
     strategy:
       matrix:
@@ -51,106 +51,106 @@ jobs:
 
 ### below is code for the lavaset-build workflow on windows platforms
 ### cannot do windows and macOS at the same time
-name: lavaset-build
+# name: lavaset-build
 
-on: [push, pull_request]
+# on: [push, pull_request]
 
-jobs:
-  build_wheels:
-    name: Build wheels on Windows and macOS for Python ${{ matrix.python-version }}
-    runs-on: [windows-latest]
-    strategy:
-      matrix:
-        python-version: ['3.10']
+# jobs:
+#   build_wheels:
+#     name: Build wheels on Windows and macOS for Python ${{ matrix.python-version }}
+#     runs-on: [windows-latest]
+#     strategy:
+#       matrix:
+#         python-version: ['3.10']
 
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install cibuildwheel
-      run: python -m pip install cibuildwheel
-    - name: Build wheels
-      run: python -m cibuildwheel --output-dir wheelhouse
-    - uses: actions/upload-artifact@v2
-      with:
-        path: ./wheelhouse/*.whl
+#     steps:
+#     - uses: actions/checkout@v2
+#     - name: Set up Python
+#       uses: actions/setup-python@v2
+#       with:
+#         python-version: ${{ matrix.python-version }}
+#     - name: Install cibuildwheel
+#       run: python -m pip install cibuildwheel
+#     - name: Build wheels
+#       run: python -m cibuildwheel --output-dir wheelhouse
+#     - uses: actions/upload-artifact@v2
+#       with:
+#         path: ./wheelhouse/*.whl
 
 
-name: Build and Publish Wheels
+# name: Build and Publish Wheels
 
-on: [push, pull_request]
+# on: [push, pull_request]
 
-jobs:
-  build_wheels:
-    name: Build wheels on Windows
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v2
+# jobs:
+#   build_wheels:
+#     name: Build wheels on Windows
+#     runs-on: windows-latest
+#     steps:
+#     - uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x' # Use the latest version of Python since we're building for multiple versions
+#     - name: Set up Python
+#       uses: actions/setup-python@v2
+#       with:
+#         python-version: '3.x' # Use the latest version of Python since we're building for multiple versions
 
-    - name: Install cibuildwheel
-      run: python -m pip install cibuildwheel
+#     - name: Install cibuildwheel
+#       run: python -m pip install cibuildwheel
 
-    - name: Build wheels with cibuildwheel
-      run: python -m cibuildwheel --output-dir wheelhouse
-      env:
-        CIBW_BUILD: cp36-* cp37-* cp38-* cp39-* cp310-* cp311-* cp312-*
-        CIBW_ARCHS: auto64 auto32 ARM64
-        CIBW_BEFORE_BUILD: pip install numpy
+#     - name: Build wheels with cibuildwheel
+#       run: python -m cibuildwheel --output-dir wheelhouse
+#       env:
+#         CIBW_BUILD: cp36-* cp37-* cp38-* cp39-* cp310-* cp311-* cp312-*
+#         CIBW_ARCHS: auto64 auto32 ARM64
+#         CIBW_BEFORE_BUILD: pip install numpy
 
-    - uses: actions/upload-artifact@v2
-      with:
-        name: wheels-windows
-        path: ./wheelhouse/*.whl
+#     - uses: actions/upload-artifact@v2
+#       with:
+#         name: wheels-windows
+#         path: ./wheelhouse/*.whl
 
-name: Build and Publish Wheels
+# name: Build and Publish Wheels
 
-on: [push, pull_request]
-jobs:
-  build_wheels:
-    name: Build wheels on Windows for PyPy
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v2
+# on: [push, pull_request]
+# jobs:
+#   build_wheels:
+#     name: Build wheels on Windows for PyPy
+#     runs-on: windows-latest
+#     steps:
+#       - uses: actions/checkout@v2
       
-      # Example for PyPy 3.7 - 3.10
-      - name: Setup PyPy 3.7
-        run: |
-          Invoke-WebRequest -Uri "https://downloads.python.org/pypy/pypy3.7-v7.3.9-win64.zip" -OutFile "pypy.zip"
-          Expand-Archive -Path "pypy.zip" -DestinationPath "$env:RUNNER_TEMP/pypy37"
-          $env:PATH = "$env:RUNNER_TEMP/pypy37\pypy3.7-v7.3.9-win64;$env:PATH"
-          [Environment]::SetEnvironmentVariable("PATH", $env:PATH, [EnvironmentVariableTarget]::Machine)
-          pypy -m ensurepip
-          pypy -m pip install --upgrade pip setuptools wheel
+#       # Example for PyPy 3.7 - 3.10
+#       - name: Setup PyPy 3.7
+#         run: |
+#           Invoke-WebRequest -Uri "https://downloads.python.org/pypy/pypy3.7-v7.3.9-win64.zip" -OutFile "pypy.zip"
+#           Expand-Archive -Path "pypy.zip" -DestinationPath "$env:RUNNER_TEMP/pypy37"
+#           $env:PATH = "$env:RUNNER_TEMP/pypy37\pypy3.7-v7.3.9-win64;$env:PATH"
+#           [Environment]::SetEnvironmentVariable("PATH", $env:PATH, [EnvironmentVariableTarget]::Machine)
+#           pypy -m ensurepip
+#           pypy -m pip install --upgrade pip setuptools wheel
 
-      - name: Setup PyPy 3.8
-        run: |
-          Invoke-WebRequest -Uri "https://downloads.python.org/pypy/pypy3.8-v7.3.11-win64.zip" -OutFile "pypy.zip"
-          Expand-Archive -Path "pypy.zip" -DestinationPath "$env:RUNNER_TEMP/pypy38"
-          $env:PATH = "$env:RUNNER_TEMP/pypy38\pypy3.8-v7.3.11-win64;$env:PATH"
-          [Environment]::SetEnvironmentVariable("PATH", $env:PATH, [EnvironmentVariableTarget]::Machine)
-          pypy -m ensurepip
-          pypy -m pip install --upgrade pip setuptools wheel
+#       - name: Setup PyPy 3.8
+#         run: |
+#           Invoke-WebRequest -Uri "https://downloads.python.org/pypy/pypy3.8-v7.3.11-win64.zip" -OutFile "pypy.zip"
+#           Expand-Archive -Path "pypy.zip" -DestinationPath "$env:RUNNER_TEMP/pypy38"
+#           $env:PATH = "$env:RUNNER_TEMP/pypy38\pypy3.8-v7.3.11-win64;$env:PATH"
+#           [Environment]::SetEnvironmentVariable("PATH", $env:PATH, [EnvironmentVariableTarget]::Machine)
+#           pypy -m ensurepip
+#           pypy -m pip install --upgrade pip setuptools wheel
       
-      # Repeat for other versions as necessary...
+#       # Repeat for other versions as necessary...
 
-      - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel
+#       - name: Install cibuildwheel
+#         run: python -m pip install cibuildwheel
 
-      - name: Build wheels with cibuildwheel
-        run: python -m cibuildwheel --output-dir wheelhouse
-        env:
-          CIBW_BUILD: pp3{7,8,9,10}-win_amd64
-          CIBW_BEFORE_BUILD: pip install numpy
+#       - name: Build wheels with cibuildwheel
+#         run: python -m cibuildwheel --output-dir wheelhouse
+#         env:
+#           CIBW_BUILD: pp3{7,8,9,10}-win_amd64
+#           CIBW_BEFORE_BUILD: pip install numpy
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: wheels-pypy
-          path: ./wheelhouse/*.whl
+#       - uses: actions/upload-artifact@v2
+#         with:
+#           name: wheels-pypy
+#           path: ./wheelhouse/*.whl
 
