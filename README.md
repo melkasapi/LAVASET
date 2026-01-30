@@ -7,8 +7,9 @@
 [![DOI:10.1101/2023.10.20.563223](http://img.shields.io/badge/DOI-10.1101/2023.10.20.563223-BE2536.svg)](https://doi.org/10.1101/2023.10.20.563223)
 [![DOI:10.1093/bioinformatics/btae101](http://img.shields.io/badge/DOI-10.1093/bioinformatics/btae101-0887BA.svg)](https://doi.org/10.1093/bioinformatics/btae101)
 [![DOI:10.1101/2024.08.01.605982](http://img.shields.io/badge/DOI-10.1101/2024.08.01.605982-BE2536.svg)](https://doi.org/10.1101/2024.08.01.605982)
+[![DOI:10.1016/j.csbj.2024.11.013](http://img.shields.io/badge/DOI-10.1016/j.csbj.2024.11.013-0887BA.svg)](https://doi.org/10.1016/j.csbj.2024.11.013)
 
-LAVASET (**La**tent **Va**riable **S**tochastic **E**nsemble of **T**rees) is a Python package designed for ensemble learning in datasets with complex spatial, spectral, and temporal dependencies. The main method is described in our Bioinformatics paper: https://doi.org/10.1093/bioinformatics/btae101. An updated version of LAVASET, v1, includes CLIFI, a class-based directional feature importance as well as boosting algorithms described in our preprint: https://www.biorxiv.org/content/10.1101/2024.08.01.605982v1.full.pdf. 
+LAVASET (**La**tent **Va**riable **S**tochastic **E**nsemble of **T**rees) is a Python package designed for ensemble learning in datasets with complex spatial, spectral, and temporal dependencies. The main method is described in our Bioinformatics paper: https://doi.org/10.1093/bioinformatics/btae101. An updated version of LAVASET, v1, includes CLIFI, a class-based directional feature importance as well as boosting algorithms described in our follow-up paper in Computational and Structural Biotechnology Journal: https://doi.org/10.1016/j.csbj.2024.11.013.
 
 ## Features
 
